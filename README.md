@@ -1,28 +1,29 @@
-# Neutron
+# Neutron Skate
 
-Un petit jeu d'arcade pour mobile, en version web. Il se joue directement dans Safari ou Chrome, sans rien installer.
+Un jeu incrémental (clicker) de skate pour mobile, en version web. Il se joue dans Safari ou Chrome, sans rien installer.
 
-Tu guides un **neutron** (n⁰, bleu) à travers une chambre à bulles :
+## Le principe
 
-- **Glisse ton doigt** n'importe où sur l'écran : le neutron suit le mouvement, sans que ton doigt le cache.
-- **Évite les protons** (p⁺, rouges) : un seul contact et la partie est finie.
-- **Attrape les photons** (γ, jaunes) : +25 MeV chacun.
-- Ton énergie (le score, en MeV) augmente avec le temps, et les particules tombent de plus en plus vite.
-- Ton record est enregistré dans le navigateur.
-- Il y a un bouton pause, et le jeu se met en pause tout seul si tu quittes l'onglet.
-- Sur ordinateur, tu peux jouer avec les flèches du clavier ; Échap met en pause.
+- **Tape sur la planche** pour faire une figure et gagner des **points de style**.
+- **Enchaîne les tapes** pour faire monter le combo (jusqu'à ×1,5 au départ).
+- Dépense ton style dans la boutique :
+  - **Figures** : Kickflip, Heelflip, 360 Flip, Impossible, 900… Chaque figure apprise multiplie les points de chaque tape.
+  - **Matos** : grip (points par tape), roulements (combo max), wax (une partie de la production ajoutée à chaque tape), chaussures (production des automatisations).
+  - **Crew** : les automatisations, qui gagnent du style chaque seconde (pote qui filme, skatepark, Insta, sponsor, part vidéo, team pro, marque, contest). Leur production double à 10, 25, 50, 100 et 200 exemplaires. Achat ×1, ×10 ou Max.
+- Une **planche dorée** traverse parfois l'écran : attrape-la pour un gros bonus.
+- La partie est **sauvegardée automatiquement** dans le navigateur. Pendant ton absence, ton crew continue de gagner 50 % de sa production (8 h maximum).
 
 ## Fichiers
 
 | Fichier | Rôle |
 | --- | --- |
 | `index.html` | Le jeu complet (HTML, CSS et JavaScript dans un seul fichier, sans dépendance) |
-| `manifest.webmanifest` | Permet d'ajouter le jeu à l'écran d'accueil, où il s'ouvre en plein écran comme une app |
+| `manifest.webmanifest` | Permet d'ajouter le jeu à l'écran d'accueil, où il s'ouvre comme une app |
 | `icons/` | Icônes de l'app |
 
-## Tester en local
+Les valeurs d'équilibrage (prix, gains, multiplicateurs) sont regroupées en haut du script dans `TRICKS`, `GEAR` et `CREW`.
 
-Ouvre `index.html` dans un navigateur, ou lance un petit serveur :
+## Tester en local
 
 ```sh
 python3 -m http.server 8000
@@ -32,5 +33,5 @@ puis ouvre http://localhost:8000.
 
 ## Mettre en ligne (GitHub Pages)
 
-Dans les réglages du dépôt GitHub : *Settings → Pages → Deploy from a branch*, choisis la branche et le dossier `/ (root)`.
+Dans les réglages du dépôt GitHub : *Settings → Pages → Deploy from a branch*, branche `main`, dossier `/ (root)`.
 Ouvre ensuite l'adresse indiquée dans Safari sur l'iPhone, puis *Partager → Sur l'écran d'accueil*.

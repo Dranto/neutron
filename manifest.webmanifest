@@ -1,16 +1,25 @@
 {
-  "name": "Neutron",
-  "short_name": "Neutron",
-  "description": "Guide ton neutron, évite les protons, attrape les photons.",
+  "name": "Neutron Skate",
+  "short_name": "Skate",
+  "description": "Tape la planche, enchaîne les figures, gagne du style et monte ton crew.",
   "lang": "fr",
   "start_url": "./",
   "scope": "./",
-  "display": "fullscreen",
+  "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#05060f",
-  "theme_color": "#05060f",
+  "background_color": "#d9d6cf",
+  "theme_color": "#d9d6cf",
   "icons": [
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ]
 }

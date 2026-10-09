@@ -5,563 +5,857 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Neutron">
-<meta name="theme-color" content="#05060f">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Neutron Skate">
+<meta name="theme-color" content="#d9d6cf">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="icon" href="icons/icon-192.png">
 <!-- ARTIFACT-START -->
-<title>Neutron</title>
+<title>Neutron Skate</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;800&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Archivo:wght@400;600;800&family=DM+Mono:wght@400;500&display=swap">
 <style>
-  /* Chambre à bulles : une seule ambiance sombre, le jeu occupe tout l'écran,
-     HUD en haut, menu en verre dépoli au centre. */
+  /* Skatepark en béton : compteur en haut, planche à taper au centre,
+     boutique en onglets en bas (comme une app). Une seule ambiance claire. */
   :root {
-    --void: #05060f;
-    --chamber: #0b1030;
-    --track: #2a3a7a;
-    --ink: #e8ecff;
-    --muted: #8d97c7;
-    --neutron: #5fd0ff;
-    --proton: #ff4d3d;
-    --photon: #ffe066;
-    --display: "Unbounded", "Avenir Next", system-ui, sans-serif;
-    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
-    color-scheme: dark;
+    --concrete: #d9d6cf;
+    --concrete-dark: #bdb8ae;
+    --paper: #f4f2ed;
+    --ink: #17161a;
+    --muted: #6b675f;
+    --orange: #ff5b14;
+    --teal: #0f7f82;
+    --gold: #e0a800;
+    --grip: #1e1d22;
+    --display: "Bowlby One", "Arial Black", Impact, sans-serif;
+    --body: "Archivo", system-ui, -apple-system, sans-serif;
+    --mono: "DM Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    color-scheme: light;
   }
+  *, *::before, *::after { box-sizing: border-box; }
+  [hidden] { display: none !important; }
   html, body {
     height: 100%;
     margin: 0;
-    background: var(--void);
+    background: var(--concrete);
     color: var(--ink);
-    overflow: hidden;
+    font-family: var(--body);
     overscroll-behavior: none;
     -webkit-user-select: none;
     user-select: none;
     -webkit-touch-callout: none;
     -webkit-tap-highlight-color: transparent;
   }
-  body { font-family: var(--mono); }
-  [hidden] { display: none !important; }
-  *, *::before, *::after { box-sizing: border-box; }
-  #stage {
-    position: fixed;
-    inset: 0;
-    touch-action: none;
-  }
-  canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-
-  .hud {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    padding: calc(env(safe-area-inset-top, 0px) + 14px) 18px 0;
+  body { overflow: hidden; }
+  .app {
+    height: 100%;
+    max-width: 560px;
+    margin: 0 auto;
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 16px;
-    pointer-events: none;
-    font-variant-numeric: tabular-nums;
-  }
-  .readout { display: grid; gap: 2px; }
-  .readout.right { text-align: right; }
-  .label {
-    font-size: 10px;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-  .value { font-size: 26px; font-weight: 600; line-height: 1.1; }
-  .value small { font-size: 12px; font-weight: 400; color: var(--muted); margin-left: 4px; }
-  .readout.right .value { color: var(--photon); }
-
-  .pause {
-    position: fixed;
-    top: calc(env(safe-area-inset-top, 0px) + 12px);
-    left: 50%;
-    transform: translateX(-50%);
-    width: 44px; height: 44px;
-    border-radius: 50%;
-    border: 1px solid var(--track);
-    background: rgba(11, 16, 48, 0.6);
-    color: var(--ink);
-    font: 600 14px var(--mono);
-    cursor: pointer;
+    flex-direction: column;
   }
 
-  .overlay {
-    position: fixed;
-    inset: 0;
+  /* ---------- Compteur ---------- */
+  .top {
+    padding: calc(env(safe-area-inset-top, 0px) + 12px) 16px 6px;
     display: grid;
-    place-items: center;
-    padding: 24px 16px;
-    background: rgba(5, 6, 15, 0.45);
-  }
-  .panel {
-    width: min(100%, 360px);
-    padding: 28px 24px 24px;
-    border-radius: 24px;
-    border: 1px solid rgba(141, 151, 199, 0.25);
-    background: rgba(11, 16, 48, 0.72);
-    -webkit-backdrop-filter: blur(14px);
-    backdrop-filter: blur(14px);
-    display: grid;
-    gap: 18px;
+    gap: 2px;
     text-align: center;
   }
-  h1 {
-    margin: 0;
-    font-family: var(--display);
-    font-weight: 800;
-    font-size: clamp(34px, 11vw, 46px);
-    letter-spacing: 0.04em;
-    line-height: 1;
-    text-wrap: balance;
+  .brand {
+    font: 400 12px var(--display);
+    letter-spacing: 0.14em;
+    color: var(--muted);
   }
-  h1 .n { color: var(--neutron); }
-  .tagline { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
-
-  .legend { display: grid; gap: 10px; text-align: left; margin: 0; padding: 0; list-style: none; }
-  .legend li { display: grid; grid-template-columns: 34px 1fr; align-items: center; gap: 12px; font-size: 13px; line-height: 1.35; }
-  .legend b { font-weight: 600; }
-  .dot {
-    width: 30px; height: 30px; border-radius: 50%;
-    display: grid; place-items: center;
-    font: 600 12px var(--mono);
-    color: var(--void);
+  .style-count {
+    font: 500 clamp(34px, 11vw, 46px)/1.05 var(--mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    overflow-wrap: anywhere;
   }
-  .dot.n { background: radial-gradient(circle at 35% 35%, #fff, var(--neutron) 55%, #1f6fff); }
-  .dot.p { background: radial-gradient(circle at 35% 35%, #ffd27a, var(--proton) 70%); }
-  .dot.g { background: radial-gradient(circle at 35% 35%, #fff, var(--photon) 70%); width: 22px; height: 22px; justify-self: center; }
+  .style-label { font-size: 13px; color: var(--muted); }
+  .style-label b { color: var(--teal); font-family: var(--mono); font-weight: 500; }
 
-  .result { display: grid; gap: 4px; }
-  .result .big { font-size: 40px; font-weight: 600; font-variant-numeric: tabular-nums; }
-  .result .big small { font-size: 16px; color: var(--muted); margin-left: 6px; }
-  .record { color: var(--photon); font-family: var(--display); font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; }
-  .stats { color: var(--muted); font-size: 12px; }
+  /* ---------- Zone de la planche ---------- */
+  .stage {
+    position: relative;
+    flex: 0 0 auto;
+    height: clamp(210px, 36vh, 330px);
+    touch-action: none;
+    cursor: pointer;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(23,22,26,0.05) 0 2px, transparent 3px) 0 0 / 23px 23px,
+      radial-gradient(circle at 70% 60%, rgba(255,255,255,0.35) 0 1px, transparent 2px) 0 0 / 17px 17px;
+  }
+  .stage::after {
+    /* Joint de dilatation du béton */
+    content: "";
+    position: absolute;
+    left: 0; right: 0; top: 50%;
+    border-top: 2px solid rgba(23,22,26,0.08);
+    border-bottom: 1px solid rgba(255,255,255,0.45);
+    pointer-events: none;
+  }
+  .board-wrap {
+    position: absolute;
+    left: 50%; top: 50%;
+    width: min(78vw, 330px);
+    aspect-ratio: 3.6;
+    max-width: 100%;
+    transform: translate(-50%, -50%);
+    perspective: 900px;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .board { position: absolute; inset: 0; transform-style: preserve-3d; }
+  .face {
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    overflow: hidden;
+  }
+  .face.top {
+    background:
+      radial-gradient(circle, #8a8780 0 2.5px, transparent 3px) 22% 32% / 14px 14px no-repeat,
+      radial-gradient(circle, #8a8780 0 2.5px, transparent 3px) 22% 68% / 14px 14px no-repeat,
+      radial-gradient(circle, #8a8780 0 2.5px, transparent 3px) 26% 32% / 14px 14px no-repeat,
+      radial-gradient(circle, #8a8780 0 2.5px, transparent 3px) 26% 68% / 14px 14px no-repeat,
+      radial-gradient(circle, #8a8780 0 2.5px, transparent 3px) 74% 32% / 14px 14px no-repeat,
+      radial-gradient(circle, #8a8780 0 2.5px, transparent 3px) 74% 68% / 14px 14px no-repeat,
+      radial-gradient(circle, #8a8780 0 2.5px, transparent 3px) 78% 32% / 14px 14px no-repeat,
+      radial-gradient(circle, #8a8780 0 2.5px, transparent 3px) 78% 68% / 14px 14px no-repeat,
+      radial-gradient(circle, rgba(255,255,255,0.09) 0 0.8px, transparent 1.2px) 0 0 / 5px 5px,
+      var(--grip);
+    box-shadow: inset 0 0 0 3px #3a3840;
+  }
+  .face.top::after {
+    /* Sticker sur le grip */
+    content: "N";
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%) rotate(-8deg);
+    padding: 2px 9px;
+    background: var(--orange);
+    color: var(--ink);
+    font: 400 15px var(--display);
+    border-radius: 4px;
+  }
+  .face.bottom {
+    transform: rotateX(180deg);
+    background:
+      repeating-linear-gradient(-55deg, transparent 0 16px, rgba(23,22,26,0.12) 16px 22px),
+      var(--orange);
+    display: grid;
+    place-items: center;
+    box-shadow: inset 0 0 0 3px #c74108;
+  }
+  .face.bottom span {
+    font: 400 clamp(16px, 5.5vw, 24px) var(--display);
+    letter-spacing: 0.08em;
+    color: var(--paper);
+    text-shadow: 2px 2px 0 var(--ink);
+  }
+  .face.bottom i {
+    position: absolute;
+    top: 14%; bottom: 14%;
+    width: 9%;
+    border-radius: 6px;
+    background: linear-gradient(90deg, #9b9a98, #e2e1dd 45%, #8d8c89);
+    box-shadow: 0 0 0 2px rgba(23,22,26,0.4);
+  }
+  .face.bottom i:nth-of-type(1) { left: 20%; }
+  .face.bottom i:nth-of-type(2) { right: 20%; }
+  .face.bottom i::before, .face.bottom i::after {
+    content: "";
+    position: absolute;
+    left: -15%; right: -15%;
+    height: 26%;
+    border-radius: 5px;
+    background: var(--paper);
+    box-shadow: 0 0 0 2px rgba(23,22,26,0.45);
+  }
+  .face.bottom i::before { top: -6%; }
+  .face.bottom i::after { bottom: -6%; }
+  .shadow {
+    position: absolute;
+    left: 6%; right: 6%; bottom: -26%;
+    height: 22%;
+    border-radius: 50%;
+    background: rgba(23,22,26,0.22);
+    filter: blur(6px);
+  }
+  .tap-hint {
+    position: absolute;
+    left: 0; right: 0; bottom: 10px;
+    text-align: center;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    pointer-events: none;
+  }
+  .combo {
+    position: absolute;
+    left: 16px; right: 16px; top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font: 500 13px var(--mono);
+    pointer-events: none;
+  }
+  .combo-bar { flex: 1; height: 6px; border-radius: 3px; background: rgba(23,22,26,0.12); overflow: hidden; }
+  .combo-bar i { display: block; height: 100%; width: 0; background: var(--orange); transition: width 0.12s linear; }
+  .pop {
+    position: absolute;
+    z-index: 3;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    white-space: nowrap;
+    padding: 4px 12px 5px;
+    border-radius: 12px;
+    background: rgba(244, 242, 237, 0.92);
+    box-shadow: 0 2px 8px rgba(23, 22, 26, 0.15);
+    animation: rise 0.9s ease-out forwards;
+  }
+  .pop b { display: block; font: 400 20px var(--display); color: var(--ink); }
+  .pop span { font: 500 15px var(--mono); color: var(--teal); }
+  .pop.gold b { color: var(--gold); }
+  @keyframes rise {
+    from { opacity: 1; transform: translate(-50%, -50%); }
+    to { opacity: 0; transform: translate(-50%, -150%); }
+  }
+  .golden {
+    position: absolute;
+    z-index: 4;
+    width: 74px; height: 22px;
+    border-radius: 999px;
+    border: 0;
+    padding: 0;
+    background: linear-gradient(90deg, #b88a00, #ffe37a 40%, #e0a800);
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.7), 0 0 22px rgba(224,168,0,0.9);
+    cursor: pointer;
+    animation: drift 9s linear forwards, wobble 0.6s ease-in-out infinite alternate;
+  }
+  @keyframes drift { from { left: -90px; } to { left: calc(100% + 20px); } }
+  @keyframes wobble { from { transform: rotate(-10deg); } to { transform: rotate(10deg); } }
 
-  .play {
+  /* ---------- Boutique ---------- */
+  .shop {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--paper);
+    border-radius: 22px 22px 0 0;
+    box-shadow: 0 -6px 20px rgba(23,22,26,0.08);
+  }
+  .tabs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    padding: 8px 12px 0;
+  }
+  .tab {
+    position: relative;
     appearance: none;
     border: 0;
-    border-radius: 999px;
-    padding: 16px 20px;
-    background: var(--neutron);
-    color: var(--void);
-    font: 800 17px var(--display);
-    letter-spacing: 0.06em;
+    background: none;
+    padding: 10px 4px 12px;
+    font: 600 14px var(--body);
+    color: var(--muted);
+    border-bottom: 3px solid transparent;
     cursor: pointer;
-    box-shadow: 0 0 28px rgba(95, 208, 255, 0.45);
   }
-  .play:active { transform: scale(0.97); }
-  button:focus-visible { outline: 2px solid var(--photon); outline-offset: 3px; }
-  .hint { margin: 0; color: var(--muted); font-size: 11px; }
+  .tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--orange); }
+  .tab .dot {
+    position: absolute;
+    top: 8px; right: 12%;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--orange);
+  }
+  .buy-mode {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+    padding: 8px 16px 0;
+  }
+  .buy-mode button {
+    appearance: none;
+    border: 1.5px solid var(--concrete-dark);
+    background: none;
+    border-radius: 999px;
+    padding: 4px 12px;
+    font: 500 13px var(--mono);
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .buy-mode button[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+  .list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 10px 16px calc(env(safe-area-inset-bottom, 0px) + 16px);
+    display: grid;
+    align-content: start;
+    gap: 10px;
+  }
+  .item {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 12px 12px 14px;
+    border-radius: 14px;
+    background: #fff;
+    border: 1px solid #e4e1da;
+  }
+  .item .info { min-width: 0; display: grid; gap: 3px; }
+  .item .name { font-weight: 800; font-size: 15px; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+  .item .owned { font: 500 13px var(--mono); color: var(--teal); }
+  .item .desc { font-size: 13px; color: var(--muted); line-height: 1.35; }
+  .item.locked .name, .item.locked .desc { color: #a7a39a; }
+  .item.done { background: transparent; border-style: dashed; }
+  .buy {
+    appearance: none;
+    border: 0;
+    min-width: 92px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: var(--ink);
+    color: var(--paper);
+    font: 500 14px var(--mono);
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+  }
+  .buy small { display: block; font: 600 10px var(--body); letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; }
+  .buy:disabled { background: var(--concrete); color: var(--muted); cursor: default; }
+  .buy.got { background: transparent; color: var(--teal); font-family: var(--body); font-weight: 800; }
+  button:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
+
+  .stats { display: grid; gap: 0; margin: 0; }
+  .stats div { display: flex; justify-content: space-between; gap: 12px; padding: 11px 2px; border-bottom: 1px solid #e4e1da; font-size: 14px; }
+  .stats dt { color: var(--muted); }
+  .stats dd { margin: 0; font: 500 14px var(--mono); text-align: right; }
+  .danger {
+    margin-top: 18px;
+    appearance: none;
+    border: 1.5px solid #c23b22;
+    background: none;
+    color: #c23b22;
+    border-radius: 12px;
+    padding: 11px;
+    font: 600 14px var(--body);
+    cursor: pointer;
+  }
+  .confirm { display: grid; gap: 8px; margin-top: 18px; padding: 14px; border-radius: 12px; background: #fde8e3; font-size: 14px; }
+  .confirm .row { display: flex; gap: 8px; }
+  .confirm button { flex: 1; appearance: none; border: 0; border-radius: 10px; padding: 10px; font: 600 14px var(--body); cursor: pointer; }
+  .confirm .yes { background: #c23b22; color: #fff; }
+  .confirm .no { background: #fff; color: var(--ink); }
+
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+    transform: translateX(-50%);
+    z-index: 10;
+    width: min(92vw, 420px);
+    padding: 12px 16px;
+    border-radius: 14px;
+    background: var(--ink);
+    color: var(--paper);
+    font-size: 14px;
+    line-height: 1.4;
+    text-align: center;
+    box-shadow: 0 8px 24px rgba(23,22,26,0.25);
+  }
+  .toast b { color: var(--orange); font-family: var(--mono); font-weight: 500; }
 
   @media (prefers-reduced-motion: reduce) {
-    .play:active { transform: none; }
+    .pop { animation-duration: 0.01s; }
+    .golden { animation: drift 9s linear forwards; }
   }
 </style>
 <!-- ARTIFACT-HEAD-END -->
 </head>
 <body>
-<div id="stage">
-  <canvas id="bg"></canvas>
-  <canvas id="game"></canvas>
-</div>
+<div class="app">
+  <header class="top">
+    <div class="brand">NEUTRON SKATE</div>
+    <div class="style-count" id="style">0</div>
+    <div class="style-label">points de style · <b id="rate">0</b> par seconde</div>
+  </header>
 
-<div class="hud" id="hud">
-  <div class="readout">
-    <span class="label">Énergie</span>
-    <span class="value"><span id="score">0</span><small>MeV</small></span>
-  </div>
-  <div class="readout right">
-    <span class="label">Record</span>
-    <span class="value"><span id="best">0</span><small>MeV</small></span>
-  </div>
-</div>
-<button class="pause" id="pauseBtn" type="button" aria-label="Pause" hidden>II</button>
-
-<div class="overlay" id="menu">
-  <div class="panel">
-    <h1><span class="n">N</span>EUTRON</h1>
-    <p class="tagline">Ton neutron traverse la chambre à bulles. Garde-le en vie le plus longtemps possible.</p>
-    <ul class="legend">
-      <li><span class="dot n">n⁰</span><span><b>Glisse ton doigt</b> n'importe où pour déplacer le neutron.</span></li>
-      <li><span class="dot p">p⁺</span><span><b>Évite les protons.</b> Un seul contact et c'est fini.</span></li>
-      <li><span class="dot g">γ</span><span><b>Attrape les photons</b> pour +25 MeV.</span></li>
-    </ul>
-    <button class="play" id="startBtn" type="button">Jouer</button>
-  </div>
-</div>
-
-<div class="overlay" id="over" hidden>
-  <div class="panel">
-    <h1>Collision</h1>
-    <div class="result">
-      <span class="big"><span id="finalScore">0</span><small>MeV</small></span>
-      <span class="record" id="newRecord" hidden>Nouveau record</span>
-      <span class="stats" id="finalStats"></span>
+  <section class="stage" id="stage" aria-label="Tape sur la planche pour faire une figure">
+    <div class="combo" id="comboBox" hidden>
+      <span id="comboText">Combo ×1,00</span>
+      <div class="combo-bar"><i id="comboFill"></i></div>
     </div>
-    <button class="play" id="restartBtn" type="button">Rejouer</button>
-  </div>
-</div>
+    <div class="board-wrap">
+      <div class="shadow" id="shadow"></div>
+      <div class="board" id="board">
+        <div class="face top"></div>
+        <div class="face bottom"><span>NEUTRON</span><i></i><i></i></div>
+      </div>
+    </div>
+    <div class="tap-hint" id="hint">Tape sur la planche</div>
+  </section>
 
-<div class="overlay" id="paused" hidden>
-  <div class="panel">
-    <h1>Pause</h1>
-    <button class="play" id="resumeBtn" type="button">Reprendre</button>
-    <p class="hint">Énergie actuelle : <span id="pausedScore">0</span> MeV</p>
-  </div>
+  <section class="shop">
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" type="button" data-tab="tricks" aria-selected="true">Figures<span class="dot" hidden></span></button>
+      <button class="tab" role="tab" type="button" data-tab="gear" aria-selected="false">Matos<span class="dot" hidden></span></button>
+      <button class="tab" role="tab" type="button" data-tab="crew" aria-selected="false">Crew<span class="dot" hidden></span></button>
+      <button class="tab" role="tab" type="button" data-tab="stats" aria-selected="false">Stats</button>
+    </div>
+    <div class="buy-mode" id="buyMode" hidden>
+      <button type="button" data-n="1" aria-pressed="true">×1</button>
+      <button type="button" data-n="10" aria-pressed="false">×10</button>
+      <button type="button" data-n="max" aria-pressed="false">Max</button>
+    </div>
+    <div class="list" id="list"></div>
+  </section>
 </div>
+<div class="toast" id="toast" hidden></div>
 
 <script>
 (() => {
   "use strict";
 
-  const PLAYER_R = 20;
-  const PHOTON_BONUS = 25;
-  const BEST_KEY = "neutron.best";
+  // ================= Données du jeu =================
+  // Figures : achat unique, chaque figure multiplie les points gagnés par tape.
+  const TRICKS = [
+    { id: "ollie",      name: "Ollie",        cost: 0,   mult: 1, desc: "La base. On décolle la planche du sol." },
+    { id: "kickflip",   name: "Kickflip",     cost: 50,  mult: 2, desc: "La planche tourne sur elle-même." },
+    { id: "heelflip",   name: "Heelflip",     cost: 600, mult: 2, desc: "Le kickflip, mais avec le talon." },
+    { id: "shoveit",    name: "Pop Shove-it", cost: 6e3, mult: 2, desc: "La planche pivote à 180° sous tes pieds." },
+    { id: "treflip",    name: "360 Flip",     cost: 7e4, mult: 3, desc: "Kickflip + shove-it 360. Le tre flip." },
+    { id: "hardflip",   name: "Hardflip",     cost: 8e5, mult: 3, desc: "Un flip vertical entre les jambes." },
+    { id: "impossible", name: "Impossible",   cost: 1e7, mult: 4, desc: "La planche s'enroule autour du pied." },
+    { id: "nine",       name: "900",          cost: 2e8, mult: 5, desc: "Deux tours et demi en l'air. Légendaire." },
+  ];
+  // Matos : améliorations à niveaux pour la tape.
+  const GEAR = [
+    { id: "grip",     name: "Grip neuf",         base: 10,   growth: 1.55, max: 200, desc: (l) => `+1 point de base par tape (actuel : ${1 + l})` },
+    { id: "bearings", name: "Roulements ABEC 9", base: 250,  growth: 4,    max: 6,   desc: (l) => `Combo max ×${fmtMult(comboCap(l + 1))} au prochain niveau` },
+    { id: "wax",      name: "Wax pour curb",     base: 3000, growth: 3,    max: 10,  desc: (l) => `Chaque tape rapporte aussi ${(l + 1) * 2} % de ta production par seconde` },
+    { id: "shoes",    name: "Chaussures pro",    base: 5e4,  growth: 6,    max: 8,   desc: (l) => `Les automatisations produisent +25 % (actuel : +${l * 25} %)` },
+  ];
+  // Crew : automatisations, produisent des points de style chaque seconde.
+  const CREW = [
+    { id: "pote",   name: "Pote qui filme",          base: 15,    rate: 0.3,   desc: "Il filme tes figures et les partage." },
+    { id: "park",   name: "Abonnement au skatepark", base: 120,   rate: 2,     desc: "Tu t'entraînes même quand tu ne tapes pas." },
+    { id: "insta",  name: "Compte Insta",            base: 1300,  rate: 12,    desc: "Tes clips tournent tout seuls." },
+    { id: "shop",   name: "Sponsor du skateshop",    base: 1.4e4, rate: 70,    desc: "Planches gratuites et pub en vitrine." },
+    { id: "video",  name: "Part vidéo",              base: 1.6e5, rate: 400,   desc: "Ta part dans la vidéo du crew." },
+    { id: "team",   name: "Team pro",                base: 2e6,   rate: 2500,  desc: "Tu tournes avec une team internationale." },
+    { id: "brand",  name: "Ta propre marque",        base: 3e7,   rate: 1.5e4, desc: "Tes planches se vendent dans le monde entier." },
+    { id: "xgames", name: "Contest international",   base: 5e8,   rate: 1e5,   desc: "Médailles, caméras et foule en délire." },
+  ];
+  const CREW_GROWTH = 1.15;
+  const MILESTONES = [10, 25, 50, 100, 200]; // chaque palier double la production de l'automatisation
 
+  // ================= État et sauvegarde =================
+  const SAVE_KEY = "neutron-skate.save.v1";
+  const fresh = () => ({
+    style: 0, total: 0, taps: 0, bestCombo: 0, goldens: 0,
+    tricks: { ollie: true }, gear: {}, crew: {},
+    started: Date.now(), lastSave: Date.now(),
+  });
+  let S = fresh();
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (raw) S = Object.assign(fresh(), JSON.parse(raw));
+  } catch { /* pas de sauvegarde disponible */ }
+  const save = () => {
+    S.lastSave = Date.now();
+    try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch { /* stockage indisponible */ }
+  };
+
+  // ================= Calculs =================
+  const lvl = (id) => S.gear[id] || 0;
+  const owned = (id) => S.crew[id] || 0;
+  const comboCap = (l) => 1.5 + l * 0.5;
+  const trickMult = () => TRICKS.reduce((m, t) => (S.tricks[t.id] ? m * t.mult : m), 1);
+  const milestoneMult = (n) => 2 ** MILESTONES.filter((m) => n >= m).length;
+  const nextMilestone = (n) => MILESTONES.find((m) => n < m);
+  const crewRate = (c) => c.rate * owned(c.id) * milestoneMult(owned(c.id)) * (1 + lvl("shoes") * 0.25);
+  const perSecond = () => CREW.reduce((sum, c) => sum + crewRate(c), 0);
+  const tapBase = () => (1 + lvl("grip")) * trickMult() + perSecond() * lvl("wax") * 0.02;
+
+  const gearCost = (g) => Math.ceil(g.base * g.growth ** lvl(g.id));
+  const crewCost = (c, n) => {
+    const first = c.base * CREW_GROWTH ** owned(c.id);
+    return Math.ceil(first * (CREW_GROWTH ** n - 1) / (CREW_GROWTH - 1));
+  };
+  const crewMaxAffordable = (c) => {
+    const first = c.base * CREW_GROWTH ** owned(c.id);
+    return Math.max(0, Math.floor(Math.log(S.style * (CREW_GROWTH - 1) / first + 1) / Math.log(CREW_GROWTH)));
+  };
+
+  // ================= Formatage =================
+  const UNITS = ["", " k", " M", " Md", " Bn", " Bd", " Tn", " Td", " Qa", " Qi"];
+  function fmt(n) {
+    if (!isFinite(n)) return "∞";
+    if (n < 1000) {
+      const v = n < 10 && n % 1 ? Math.floor(n * 10) / 10 : Math.floor(n);
+      return String(v).replace(".", ",");
+    }
+    const tier = Math.min(Math.floor(Math.log10(n) / 3), UNITS.length - 1);
+    const v = n / 1000 ** tier;
+    const digits = v < 10 ? 2 : v < 100 ? 1 : 0;
+    return (Math.floor(v * 10 ** digits) / 10 ** digits).toFixed(digits).replace(".", ",") + UNITS[tier];
+  }
+  function fmtMult(x) { return x.toFixed(2).replace(".", ","); }
+  function fmtDuration(ms) {
+    const s = Math.floor(ms / 1000), h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+    return h ? `${h} h ${String(m).padStart(2, "0")}` : m ? `${m} min ${String(s % 60).padStart(2, "0")}` : `${s} s`;
+  }
+
+  // ================= Éléments =================
   const $ = (id) => document.getElementById(id);
-  const stage = $("stage");
-  const bg = $("bg"), bgx = bg.getContext("2d");
-  const cv = $("game"), cx = cv.getContext("2d");
-  const ui = {
-    score: $("score"), best: $("best"), menu: $("menu"), over: $("over"), paused: $("paused"),
-    finalScore: $("finalScore"), finalStats: $("finalStats"), newRecord: $("newRecord"),
-    pauseBtn: $("pauseBtn"), pausedScore: $("pausedScore"),
+  const el = {
+    style: $("style"), rate: $("rate"), stage: $("stage"), board: $("board"), shadow: $("shadow"),
+    hint: $("hint"), comboBox: $("comboBox"), comboText: $("comboText"), comboFill: $("comboFill"),
+    list: $("list"), buyMode: $("buyMode"), toast: $("toast"),
   };
+  const gain = (n) => { S.style += n; S.total += n; };
 
-  const readBest = () => { try { return parseInt(localStorage.getItem(BEST_KEY), 10) || 0; } catch { return 0; } };
-  const writeBest = (v) => { try { localStorage.setItem(BEST_KEY, String(v)); } catch { /* stockage indisponible */ } };
-  const buzz = (ms) => { try { navigator.vibrate && navigator.vibrate(ms); } catch { /* non supporté */ } };
-
-  let W = 0, H = 0, DPR = 1;
-  const state = {
-    phase: "ready",          // ready | playing | paused | over
-    particles: [],
-    sparks: [],
-    trail: [],
-    x: 0,
-    elapsed: 0,
-    bonus: 0,
-    photons: 0,
-    spawnIn: 0,
-    score: 0,
-    best: readBest(),
+  // ================= Tape sur la planche =================
+  const T = (y, s, z, x, yy) => ({ transform: `translateY(${y}px) scale(${s}) rotateZ(${z}deg) rotateX(${x}deg) rotateY(${yy}deg)` });
+  const ANIMS = {
+    ollie:      [T(0, 1, 0, 0, 0), T(-46, 1.16, -7, 0, 0), T(0, 1, 0, 0, 0)],
+    kickflip:   [T(0, 1, 0, 0, 0), T(-52, 1.18, -4, 180, 0), T(0, 1, 0, 360, 0)],
+    heelflip:   [T(0, 1, 0, 0, 0), T(-52, 1.18, 4, -180, 0), T(0, 1, 0, -360, 0)],
+    shoveit:    [T(0, 1, 0, 0, 0), T(-48, 1.16, 90, 0, 0), T(0, 1, 180, 0, 0)],
+    treflip:    [T(0, 1, 0, 0, 0), T(-60, 1.22, 180, 180, 0), T(0, 1, 360, 360, 0)],
+    hardflip:   [T(0, 1, 0, 0, 0), T(-60, 1.22, 90, 180, 90), T(0, 1, 180, 360, 180)],
+    impossible: [T(0, 1, 0, 0, 0), T(-62, 1.24, 0, 0, 180), T(0, 1, 0, 0, 360)],
+    nine:       [T(0, 1, 0, 0, 0), T(-70, 1.28, 450, 0, 0), T(0, 1, 900, 0, 0)],
   };
-  ui.best.textContent = state.best;
+  let combo = 0, comboUntil = 0, boardAnim = null;
+  const COMBO_WINDOW = 1100;
+  const comboMult = () => Math.min(comboCap(lvl("bearings")), 1 + combo * 0.03);
 
-  const playerY = () => Math.max(PLAYER_R, H - 110);
-  const clampX = (x) => Math.min(Math.max(x, PLAYER_R), Math.max(PLAYER_R, W - PLAYER_R));
-  const rand = (a, b) => a + Math.random() * (b - a);
-
-  // ---------- Décor : traces de la chambre à bulles ----------
-  function drawBackground() {
-    bgx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    const g = bgx.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, "#0b1030");
-    g.addColorStop(1, "#05060f");
-    bgx.fillStyle = g;
-    bgx.fillRect(0, 0, W, H);
-
-    bgx.lineWidth = 1;
-    for (let i = 0; i < 14; i++) {
-      // Spirales de particules chargées dans un champ magnétique
-      let px = rand(0, W), py = rand(0, H);
-      let angle = rand(0, Math.PI * 2);
-      let r = rand(40, 160);
-      const turn = (Math.random() < 0.5 ? -1 : 1) * rand(0.03, 0.07);
-      bgx.strokeStyle = `rgba(42, 58, 122, ${rand(0.25, 0.55).toFixed(2)})`;
-      bgx.beginPath();
-      bgx.moveTo(px, py);
-      for (let s = 0; s < 140; s++) {
-        angle += turn * (160 / r);
-        r *= 0.992;
-        px += Math.cos(angle) * 3;
-        py += Math.sin(angle) * 3;
-        bgx.lineTo(px, py);
-      }
-      bgx.stroke();
-    }
-    for (let i = 0; i < 90; i++) {
-      bgx.fillStyle = `rgba(141, 151, 199, ${rand(0.08, 0.3).toFixed(2)})`;
-      bgx.beginPath();
-      bgx.arc(rand(0, W), rand(0, H), rand(0.5, 1.6), 0, Math.PI * 2);
-      bgx.fill();
-    }
+  function pickTrick() {
+    const learned = TRICKS.filter((t) => S.tricks[t.id]);
+    // Les figures les plus récentes sortent plus souvent
+    const weights = learned.map((_, i) => i + 1);
+    let r = Math.random() * weights.reduce((a, b) => a + b, 0);
+    for (let i = 0; i < learned.length; i++) { r -= weights[i]; if (r <= 0) return learned[i]; }
+    return learned[learned.length - 1];
   }
 
-  function resize() {
-    const rect = stage.getBoundingClientRect();
-    W = Math.round(rect.width);
-    H = Math.round(rect.height);
-    DPR = Math.min(window.devicePixelRatio || 1, 3);
-    for (const c of [bg, cv]) {
-      c.width = Math.round(W * DPR);
-      c.height = Math.round(H * DPR);
-    }
-    state.x = state.phase === "playing" || state.phase === "paused" ? clampX(state.x) : W / 2;
-    drawBackground();
-    render();
+  function popText(x, y, title, amount, gold) {
+    const p = document.createElement("div");
+    p.className = "pop" + (gold ? " gold" : "");
+    p.style.left = x + "px";
+    p.style.top = y + "px";
+    p.innerHTML = `<b></b><span></span>`;
+    p.firstChild.textContent = title;
+    p.lastChild.textContent = "+" + fmt(amount);
+    el.stage.appendChild(p);
+    setTimeout(() => p.remove(), 950);
   }
 
-  // ---------- Logique ----------
-  function start() {
-    Object.assign(state, {
-      phase: "playing", particles: [], sparks: [], trail: [],
-      x: W / 2, elapsed: 0, bonus: 0, photons: 0, spawnIn: 0.5, score: 0,
+  function tap(e) {
+    const now = performance.now();
+    combo = now < comboUntil ? combo + 1 : 0;
+    comboUntil = now + COMBO_WINDOW;
+    const mult = comboMult();
+    S.bestCombo = Math.max(S.bestCombo, combo);
+    const amount = tapBase() * mult;
+    gain(amount);
+    S.taps += 1;
+
+    const trick = pickTrick();
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!reduce) {
+      boardAnim?.cancel();
+      boardAnim = el.board.animate(ANIMS[trick.id], { duration: 520, easing: "cubic-bezier(.2,.7,.3,1)" });
+      el.shadow.animate([{ transform: "scale(1)", opacity: 1 }, { transform: "scale(.6)", opacity: 0.5, offset: 0.45 }, { transform: "scale(1)", opacity: 1 }], { duration: 520 });
+    }
+    const rect = el.stage.getBoundingClientRect();
+    const x = Math.min(Math.max(e.clientX - rect.left, 70), rect.width - 70);
+    const y = Math.min(Math.max(e.clientY - rect.top, 50), rect.height - 30);
+    popText(x, y - 20, trick.name, amount);
+    try { navigator.vibrate?.(8); } catch { /* non supporté */ }
+    el.hint.hidden = true;
+  }
+  el.stage.addEventListener("pointerdown", (e) => {
+    if (e.target.closest(".golden")) return;
+    e.preventDefault();
+    tap(e);
+  });
+
+  // ================= Planche dorée (bonus aléatoire) =================
+  let nextGolden = Date.now() + 40000 + Math.random() * 40000;
+  function spawnGolden() {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "golden";
+    b.setAttribute("aria-label", "Planche dorée : tape pour un bonus");
+    b.style.top = 20 + Math.random() * 50 + "%";
+    b.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const reward = Math.max(tapBase() * 30, perSecond() * 90, 25);
+      gain(reward);
+      S.goldens += 1;
+      const rect = el.stage.getBoundingClientRect();
+      popText(e.clientX - rect.left, e.clientY - rect.top, "Planche dorée !", reward, true);
+      try { navigator.vibrate?.([15, 30, 15]); } catch { /* non supporté */ }
+      b.remove();
     });
-    ui.menu.hidden = true;
-    ui.over.hidden = true;
-    ui.paused.hidden = true;
-    ui.pauseBtn.hidden = false;
-    ui.score.textContent = "0";
-    requestWakeLock();
-    last = 0;
+    b.addEventListener("animationend", (e) => { if (e.animationName === "drift") b.remove(); });
+    el.stage.appendChild(b);
   }
 
-  function spawn() {
-    const photon = Math.random() < 0.18;
-    const r = photon ? 12 : rand(14, 28);
-    state.particles.push({
-      kind: photon ? "photon" : "proton",
-      x: rand(r, W - r),
-      y: -r,
-      r,
-      speed: rand(180, 300),
-      spin: rand(0, Math.PI * 2),
-    });
+  // ================= Boutique =================
+  let tab = "tricks", buyN = 1;
+  let rows = [];
+
+  function itemRow(name, onBuy) {
+    const row = document.createElement("div");
+    row.className = "item";
+    row.innerHTML = `<div class="info"><div class="name"><span></span><span class="owned"></span></div><div class="desc"></div></div><button type="button" class="buy"></button>`;
+    row.querySelector(".name span").textContent = name;
+    const btn = row.querySelector(".buy");
+    btn.addEventListener("click", () => { onBuy(); save(); refresh(true); });
+    el.list.appendChild(row);
+    return { row, btn, ownedEl: row.querySelector(".owned"), descEl: row.querySelector(".desc"), nameEl: row.querySelector(".name span") };
   }
 
-  function burst(x, y, color, count, power) {
-    for (let i = 0; i < count; i++) {
-      const a = rand(0, Math.PI * 2), v = rand(0.3, 1) * power;
-      state.sparks.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 1, color });
-    }
-  }
+  const isNextTrick = (t) => TRICKS.find((x) => !S.tricks[x.id]) === t;
 
-  function step(dt) {
-    dt = Math.min(dt, 1 / 20);
-    const diff = 1 + state.elapsed / 25;
-
-    if (state.phase === "playing") {
-      state.elapsed += dt;
-      state.spawnIn -= dt;
-      if (state.spawnIn <= 0 && W > 80) {
-        spawn();
-        state.spawnIn = Math.max(0.18, 0.75 / diff);
-      }
-
-      const py = playerY();
-      let hit = null;
-      for (const p of state.particles) {
-        p.y += p.speed * diff * dt;
-        p.spin += dt * 2;
-        const d = Math.hypot(p.x - state.x, p.y - py);
-        if (d < (p.r + PLAYER_R) * 0.85) {
-          if (p.kind === "photon") {
-            p.dead = true;
-            state.bonus += PHOTON_BONUS;
-            state.photons += 1;
-            burst(p.x, p.y, "#ffe066", 14, 160);
-            buzz(10);
-          } else {
-            hit = p;
-          }
-        }
-      }
-      state.particles = state.particles.filter((p) => !p.dead && p.y - p.r <= H);
-
-      state.trail.push({ x: state.x, y: py });
-      if (state.trail.length > 14) state.trail.shift();
-      for (const t of state.trail) t.y += 240 * diff * dt;
-
-      state.score = Math.floor(state.elapsed * 10) + state.bonus;
-      ui.score.textContent = state.score;
-
-      if (hit) gameOver(hit);
-    }
-
-    for (const s of state.sparks) {
-      s.x += s.vx * dt;
-      s.y += s.vy * dt;
-      s.vx *= 0.96;
-      s.vy *= 0.96;
-      s.life -= dt * 1.6;
-    }
-    state.sparks = state.sparks.filter((s) => s.life > 0);
-  }
-
-  function gameOver(hit) {
-    state.phase = "over";
-    burst(state.x, playerY(), "#5fd0ff", 26, 260);
-    burst(hit.x, hit.y, "#ff4d3d", 20, 220);
-    buzz([30, 40, 60]);
-    const isRecord = state.score > state.best;
-    if (isRecord) {
-      state.best = state.score;
-      writeBest(state.best);
-      ui.best.textContent = state.best;
-    }
-    ui.finalScore.textContent = state.score;
-    ui.newRecord.hidden = !isRecord;
-    const secs = state.elapsed.toFixed(1).replace(".", ",");
-    ui.finalStats.textContent = `${secs} s de vol · ${state.photons} photon${state.photons > 1 ? "s" : ""} capté${state.photons > 1 ? "s" : ""}`;
-    ui.pauseBtn.hidden = true;
-    releaseWakeLock();
-    setTimeout(() => { if (state.phase === "over") ui.over.hidden = false; }, 650);
-  }
-
-  function pause() {
-    if (state.phase !== "playing") return;
-    state.phase = "paused";
-    ui.pausedScore.textContent = state.score;
-    ui.paused.hidden = false;
-    ui.pauseBtn.hidden = true;
-    releaseWakeLock();
-  }
-
-  function resume() {
-    if (state.phase !== "paused") return;
-    state.phase = "playing";
-    ui.paused.hidden = true;
-    ui.pauseBtn.hidden = false;
-    requestWakeLock();
-    last = 0;
-  }
-
-  // ---------- Rendu ----------
-  function ball(x, y, r, stops, glow) {
-    cx.shadowColor = glow;
-    cx.shadowBlur = r * 0.9;
-    const g = cx.createRadialGradient(x - r / 3, y - r / 3, 0, x, y, r * 1.15);
-    stops.forEach(([o, c]) => g.addColorStop(o, c));
-    cx.fillStyle = g;
-    cx.beginPath();
-    cx.arc(x, y, r, 0, Math.PI * 2);
-    cx.fill();
-    cx.shadowBlur = 0;
-  }
-
-  function render() {
-    cx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    cx.clearRect(0, 0, W, H);
-
-    for (const p of state.particles) {
-      if (p.kind === "proton") {
-        ball(p.x, p.y, p.r, [[0, "#ffd27a"], [0.55, "#ff4d3d"], [1, "#a3170e"]], "rgba(255,77,61,0.7)");
-        cx.fillStyle = "rgba(5,6,15,0.65)";
-        cx.font = `600 ${Math.round(p.r * 0.7)}px "IBM Plex Mono", monospace`;
-        cx.textAlign = "center";
-        cx.textBaseline = "middle";
-        cx.fillText("p⁺", p.x, p.y + 1);
-      } else {
-        // Photon : un point lumineux qui ondule
-        cx.strokeStyle = "rgba(255,224,102,0.55)";
-        cx.lineWidth = 1.5;
-        cx.beginPath();
-        for (let i = 0; i <= 24; i++) {
-          const yy = p.y - p.r - i * 2.2;
-          const xx = p.x + Math.sin(p.spin * 3 + i * 0.7) * 4;
-          i === 0 ? cx.moveTo(xx, yy) : cx.lineTo(xx, yy);
-        }
-        cx.stroke();
-        ball(p.x, p.y, p.r, [[0, "#ffffff"], [0.5, "#ffe066"], [1, "#e0a800"]], "rgba(255,224,102,0.9)");
-      }
-    }
-
-    if (state.phase === "playing" || state.phase === "paused" || state.phase === "ready") {
-      const py = playerY();
-      state.trail.forEach((t, i) => {
-        const a = (i + 1) / state.trail.length;
-        cx.fillStyle = `rgba(95,208,255,${(a * 0.25).toFixed(3)})`;
-        cx.beginPath();
-        cx.arc(t.x, t.y, PLAYER_R * a * 0.8, 0, Math.PI * 2);
-        cx.fill();
+  function buildList() {
+    el.list.innerHTML = "";
+    el.list.scrollTop = 0;
+    el.buyMode.hidden = tab !== "crew";
+    rows = [];
+    statsEls = null;
+    if (tab === "tricks") {
+      TRICKS.forEach((t) => {
+        const r = itemRow(t.name, () => {
+          if (S.tricks[t.id] || S.style < t.cost) return;
+          S.style -= t.cost;
+          S.tricks[t.id] = true;
+          toast(`Nouvelle figure : <b>${t.name}</b>. Tes tapes valent ×${t.mult}.`);
+        });
+        r.update = () => {
+          const got = !!S.tricks[t.id];
+          const visible = got || S.total >= t.cost * 0.3 || isNextTrick(t);
+          r.nameEl.textContent = visible ? t.name : "Figure secrète";
+          r.ownedEl.textContent = t.mult > 1 ? `×${t.mult}` : "";
+          r.descEl.textContent = visible ? t.desc : "Gagne plus de style pour la découvrir.";
+          r.row.classList.toggle("locked", !visible);
+          r.row.classList.toggle("done", got);
+          setBtn(r.btn, got ? null : t.cost, !got && S.style >= t.cost, got ? "Acquis" : "");
+        };
+        rows.push(r);
       });
-      ball(state.x, py, PLAYER_R, [[0, "#ffffff"], [0.45, "#5fd0ff"], [1, "#1f6fff"]], "rgba(95,208,255,0.8)");
-      cx.fillStyle = "rgba(5,6,15,0.7)";
-      cx.font = '600 15px "IBM Plex Mono", monospace';
-      cx.textAlign = "center";
-      cx.textBaseline = "middle";
-      cx.fillText("n⁰", state.x, py + 1);
+    } else if (tab === "gear") {
+      GEAR.forEach((g) => {
+        const r = itemRow(g.name, () => {
+          const c = gearCost(g);
+          if (lvl(g.id) >= g.max || S.style < c) return;
+          S.style -= c;
+          S.gear[g.id] = lvl(g.id) + 1;
+        });
+        r.update = () => {
+          const l = lvl(g.id), maxed = l >= g.max, c = gearCost(g);
+          const visible = l > 0 || S.total >= g.base * 0.3;
+          r.nameEl.textContent = visible ? g.name : "???";
+          r.ownedEl.textContent = l ? `niv. ${l}` : "";
+          r.descEl.textContent = !visible ? "Gagne plus de style pour le découvrir." : maxed ? "Niveau maximum atteint." : g.desc(l);
+          r.row.classList.toggle("locked", !visible);
+          r.row.classList.toggle("done", maxed);
+          setBtn(r.btn, maxed || !visible ? null : c, S.style >= c, maxed ? "Max" : "—");
+        };
+        rows.push(r);
+      });
+    } else if (tab === "crew") {
+      CREW.forEach((c, i) => {
+        const r = itemRow(c.name, () => {
+          const n = buyN === "max" ? crewMaxAffordable(c) : buyN;
+          const cost = crewCost(c, n);
+          if (n < 1 || S.style < cost) return;
+          const before = owned(c.id);
+          S.style -= cost;
+          S.crew[c.id] = before + n;
+          if (milestoneMult(before + n) > milestoneMult(before)) toast(`<b>${c.name}</b> : production doublée !`);
+        });
+        r.update = () => {
+          const n = owned(c.id);
+          const visible = n > 0 || i === 0 || S.total >= c.base * 0.4 || owned(CREW[i - 1].id) > 0;
+          const qty = buyN === "max" ? Math.max(1, crewMaxAffordable(c)) : buyN;
+          const cost = crewCost(c, qty);
+          const next = nextMilestone(n);
+          const each = c.rate * milestoneMult(n) * (1 + lvl("shoes") * 0.25);
+          r.nameEl.textContent = visible ? c.name : "???";
+          r.ownedEl.textContent = n ? `×${n}` : "";
+          r.descEl.textContent = visible
+            ? `${c.desc} ${fmt(each)}/s chacun${n ? ` · total ${fmt(crewRate(c))}/s` : ""}${next ? ` · ×2 à ${next}` : ""}`
+            : "Continue de rider pour débloquer.";
+          r.row.classList.toggle("locked", !visible);
+          setBtn(r.btn, visible ? cost : null, S.style >= cost, "—", qty > 1 ? `×${qty}` : "");
+        };
+        rows.push(r);
+      });
+    } else {
+      buildStats();
     }
-
-    for (const s of state.sparks) {
-      cx.globalAlpha = Math.max(0, s.life);
-      cx.fillStyle = s.color;
-      cx.beginPath();
-      cx.arc(s.x, s.y, 2.2, 0, Math.PI * 2);
-      cx.fill();
-    }
-    cx.globalAlpha = 1;
   }
 
-  // ---------- Boucle ----------
-  let last = 0;
-  function frame(t) {
-    if (last) step((t - last) / 1000);
-    last = t;
-    render();
+  function setBtn(btn, cost, can, label, qtyLabel = "") {
+    btn.classList.toggle("got", cost === null);
+    btn.disabled = cost === null || !can;
+    const html = cost === null ? label : `${qtyLabel ? `<small>${qtyLabel}</small>` : ""}${fmt(cost)}`;
+    if (btn._html !== html) { btn.innerHTML = html; btn._html = html; }
+  }
+
+  let statsEls = null;
+  function buildStats() {
+    el.list.innerHTML = `
+      <dl class="stats">
+        <div><dt>Style gagné au total</dt><dd data-s="total"></dd></div>
+        <div><dt>Points par tape</dt><dd data-s="tap"></dd></div>
+        <div><dt>Production par seconde</dt><dd data-s="rate"></dd></div>
+        <div><dt>Tapes sur la planche</dt><dd data-s="taps"></dd></div>
+        <div><dt>Meilleur combo</dt><dd data-s="combo"></dd></div>
+        <div><dt>Figures apprises</dt><dd data-s="tricks"></dd></div>
+        <div><dt>Planches dorées attrapées</dt><dd data-s="goldens"></dd></div>
+        <div><dt>Temps depuis le début</dt><dd data-s="time"></dd></div>
+      </dl>
+      <button type="button" class="danger" id="resetBtn">Recommencer de zéro</button>
+      <div class="confirm" id="confirmBox" hidden>
+        <span>Tout ton style, tes figures et ton crew seront effacés. Recommencer ?</span>
+        <div class="row"><button type="button" class="no" id="noBtn">Annuler</button><button type="button" class="yes" id="yesBtn">Tout effacer</button></div>
+      </div>`;
+    statsEls = Object.fromEntries([...el.list.querySelectorAll("[data-s]")].map((d) => [d.dataset.s, d]));
+    const box = $("confirmBox"), reset = $("resetBtn");
+    reset.addEventListener("click", () => { box.hidden = false; reset.hidden = true; });
+    $("noBtn").addEventListener("click", () => { box.hidden = true; reset.hidden = false; });
+    $("yesBtn").addEventListener("click", () => {
+      S = fresh();
+      save();
+      combo = 0;
+      el.hint.hidden = false;
+      buildList();
+      refresh(true);
+      toast("Nouvelle partie. Un ollie pour commencer !");
+    });
+  }
+  function updateStats() {
+    if (!statsEls) return;
+    statsEls.total.textContent = fmt(S.total);
+    statsEls.tap.textContent = fmt(tapBase());
+    statsEls.rate.textContent = fmt(perSecond()) + "/s";
+    statsEls.taps.textContent = S.taps.toLocaleString("fr-FR");
+    statsEls.combo.textContent = S.bestCombo;
+    statsEls.tricks.textContent = `${TRICKS.filter((t) => S.tricks[t.id]).length} / ${TRICKS.length}`;
+    statsEls.goldens.textContent = S.goldens;
+    statsEls.time.textContent = fmtDuration(Date.now() - S.started);
+  }
+
+  function updateTabDots() {
+    const canTrick = TRICKS.some((t) => !S.tricks[t.id] && S.style >= t.cost);
+    const canGear = GEAR.some((g) => lvl(g.id) < g.max && S.style >= gearCost(g) && S.total >= g.base * 0.3);
+    const canCrew = CREW.some((c) => S.style >= crewCost(c, 1));
+    document.querySelectorAll(".tab").forEach((t) => {
+      const dot = t.querySelector(".dot");
+      if (!dot) return;
+      const on = { tricks: canTrick, gear: canGear, crew: canCrew }[t.dataset.tab];
+      dot.hidden = !on || t.dataset.tab === tab;
+    });
+  }
+
+  let lastRefresh = 0;
+  function refresh(force) {
+    el.style.textContent = fmt(S.style);
+    el.rate.textContent = fmt(perSecond());
+    const now = performance.now();
+    if (!force && now - lastRefresh < 200) return;
+    lastRefresh = now;
+    rows.forEach((r) => r.update());
+    updateStats();
+    updateTabDots();
+  }
+
+  document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () => {
+    tab = t.dataset.tab;
+    document.querySelectorAll(".tab").forEach((x) => x.setAttribute("aria-selected", String(x === t)));
+    buildList();
+    refresh(true);
+  }));
+  el.buyMode.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => {
+    buyN = b.dataset.n === "max" ? "max" : Number(b.dataset.n);
+    el.buyMode.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    refresh(true);
+  }));
+
+  let toastTimer = 0;
+  function toast(html, ms = 2600) {
+    el.toast.innerHTML = html;
+    el.toast.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { el.toast.hidden = true; }, ms);
+  }
+  el.toast.addEventListener("click", () => { el.toast.hidden = true; });
+
+  // ================= Boucle =================
+  let last = performance.now(), lastSaveAt = Date.now();
+  function frame(now) {
+    const dt = Math.min(Math.max((now - last) / 1000, 0), 1);
+    last = now;
+    gain(perSecond() * dt);
+
+    if (performance.now() > comboUntil) combo = 0;
+    const showCombo = combo >= 3;
+    el.comboBox.hidden = !showCombo;
+    if (showCombo) {
+      const cap = comboCap(lvl("bearings"));
+      el.comboText.textContent = `Combo ×${fmtMult(comboMult())}`;
+      el.comboFill.style.width = ((comboMult() - 1) / (cap - 1)) * 100 + "%";
+    }
+
+    if (Date.now() > nextGolden) {
+      nextGolden = Date.now() + 45000 + Math.random() * 75000;
+      if (!document.hidden) spawnGolden();
+    }
+    if (Date.now() - lastSaveAt > 5000) { save(); lastSaveAt = Date.now(); }
+    refresh(false);
     requestAnimationFrame(frame);
   }
 
-  // ---------- Commandes tactiles (déplacement relatif : le doigt ne cache pas le neutron) ----------
-  let pointerId = null, lastPX = 0;
-  stage.addEventListener("pointerdown", (e) => {
-    if (state.phase !== "playing") return;
-    pointerId = e.pointerId;
-    lastPX = e.clientX;
-    try { stage.setPointerCapture(e.pointerId); } catch { /* ignoré */ }
-    e.preventDefault();
+  // Gains pendant l'absence (50 % de la production, 8 h maximum)
+  function offlineGains() {
+    const away = Math.min(Date.now() - S.lastSave, 8 * 3600 * 1000);
+    const earned = perSecond() * (away / 1000) * 0.5;
+    if (away > 30000 && earned >= 1) {
+      gain(earned);
+      toast(`Pendant ton absence (${fmtDuration(away)}), ton crew a gagné <b>${fmt(earned)}</b> points de style.`, 5000);
+    }
+  }
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) save();
+    else { offlineGains(); last = performance.now(); save(); }
   });
-  stage.addEventListener("pointermove", (e) => {
-    if (e.pointerId !== pointerId || state.phase !== "playing") return;
-    state.x = clampX(state.x + (e.clientX - lastPX) * 1.4);
-    lastPX = e.clientX;
-    e.preventDefault();
-  });
-  const endPointer = (e) => { if (e.pointerId === pointerId) pointerId = null; };
-  stage.addEventListener("pointerup", endPointer);
-  stage.addEventListener("pointercancel", endPointer);
-
-  // Clavier (pratique sur ordinateur)
-  const keys = new Set();
-  addEventListener("keydown", (e) => {
-    keys.add(e.key);
-    if ((e.key === " " || e.key === "Enter") && (state.phase === "ready" || state.phase === "over") && document.activeElement?.tagName !== "BUTTON") start();
-    if (e.key === "Escape" || e.key === "p") state.phase === "playing" ? pause() : resume();
-  });
-  addEventListener("keyup", (e) => keys.delete(e.key));
-  setInterval(() => {
-    if (state.phase !== "playing") return;
-    const dir = (keys.has("ArrowRight") || keys.has("d") ? 1 : 0) - (keys.has("ArrowLeft") || keys.has("q") || keys.has("a") ? 1 : 0);
-    if (dir) state.x = clampX(state.x + dir * 9);
-  }, 16);
-
-  $("startBtn").addEventListener("click", start);
-  $("restartBtn").addEventListener("click", start);
-  $("resumeBtn").addEventListener("click", resume);
-  ui.pauseBtn.addEventListener("click", pause);
-  document.addEventListener("visibilitychange", () => { if (document.hidden) pause(); });
-  // Empêche le zoom par pincement / double-tap sur iOS
+  addEventListener("pagehide", save);
   document.addEventListener("gesturestart", (e) => e.preventDefault());
-  document.addEventListener("dblclick", (e) => e.preventDefault());
 
-  // ---------- Écran toujours allumé pendant la partie ----------
-  let wakeLock = null;
-  async function requestWakeLock() {
-    try { wakeLock = await navigator.wakeLock?.request("screen"); } catch { wakeLock = null; }
-  }
-  function releaseWakeLock() {
-    try { wakeLock?.release(); } catch { /* ignoré */ }
-    wakeLock = null;
-  }
-
-  addEventListener("resize", resize);
-  resize();
+  offlineGains();
+  buildList();
+  refresh(true);
+  if (S.taps > 0) el.hint.hidden = true;
   requestAnimationFrame(frame);
 })();
 </script>
