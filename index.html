@@ -7,7 +7,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Neutron Skate">
-<meta name="theme-color" content="#d9d6cf">
+<meta name="theme-color" content="#f2eee3">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="icon" href="icons/icon-192.png">
@@ -15,23 +15,25 @@
 <title>Neutron Skate</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Archivo:wght@400;600;800&family=DM+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Barlow+Condensed:wght@600;800&family=Barlow:wght@500;700&display=swap">
 <style>
-  /* Skatepark en béton : compteur en haut, planche à taper au centre,
-     boutique en onglets en bas (comme une app). Une seule ambiance claire. */
+  /* Identité « zine de skate imprimé en risographie » :
+     papier crème, encre noire épaisse, rose fluo, bleu riso, jaune,
+     cartes autocollants avec ombre dure. Une seule ambiance claire assumée.
+     Mise en page : en-tête (rang + compteur), scène du spot qui évolue,
+     boutique en onglets. */
   :root {
-    --concrete: #d9d6cf;
-    --concrete-dark: #bdb8ae;
-    --paper: #f4f2ed;
-    --ink: #17161a;
-    --muted: #6b675f;
-    --orange: #ff5b14;
-    --teal: #0f7f82;
-    --gold: #e0a800;
-    --grip: #1e1d22;
-    --display: "Bowlby One", "Arial Black", Impact, sans-serif;
-    --body: "Archivo", system-ui, -apple-system, sans-serif;
-    --mono: "DM Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --paper: #f2eee3;
+    --paper-2: #e8e2d3;
+    --ink: #141414;
+    --pink: #ff4fa3;
+    --blue: #2b59ff;
+    --yellow: #ffd400;
+    --concrete: #cfc9bc;
+    --muted: #5f5a50;
+    --display: "Bungee", "Arial Black", Impact, sans-serif;
+    --cond: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+    --body: "Barlow", system-ui, -apple-system, sans-serif;
     color-scheme: light;
   }
   *, *::before, *::after { box-sizing: border-box; }
@@ -39,7 +41,7 @@
   html, body {
     height: 100%;
     margin: 0;
-    background: var(--concrete);
+    background: var(--paper);
     color: var(--ink);
     font-family: var(--body);
     overscroll-behavior: none;
@@ -55,195 +57,274 @@
     margin: 0 auto;
     display: flex;
     flex-direction: column;
+    background: var(--paper);
   }
 
-  /* ---------- Compteur ---------- */
+  /* ---------- En-tête ---------- */
   .top {
-    padding: calc(env(safe-area-inset-top, 0px) + 12px) 16px 6px;
+    padding: calc(env(safe-area-inset-top, 0px) + 10px) 16px 10px;
     display: grid;
-    gap: 2px;
-    text-align: center;
+    gap: 8px;
+    border-bottom: 3px solid var(--ink);
+    background: var(--paper);
+    position: relative;
+    z-index: 3;
   }
-  .brand {
-    font: 400 12px var(--display);
-    letter-spacing: 0.14em;
+  .rank-row { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  .rank-chip {
+    flex: none;
+    padding: 5px 10px 4px;
+    background: var(--ink);
+    color: var(--yellow);
+    font: 400 13px var(--display);
+    letter-spacing: 0.02em;
+    transform: rotate(-2.5deg);
+    box-shadow: 3px 3px 0 var(--pink);
+  }
+  .rank-progress { flex: 1; min-width: 0; display: grid; gap: 4px; }
+  .rank-progress .bar { height: 10px; border: 2px solid var(--ink); background: var(--paper-2); overflow: hidden; }
+  .rank-progress .bar i {
+    display: block; height: 100%; width: 0;
+    background: repeating-linear-gradient(-45deg, var(--pink) 0 6px, #ff7dbc 6px 12px);
+    transition: width 0.3s ease-out;
+  }
+  .rank-progress span {
+    font: 600 12px var(--cond);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .count-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; }
+  .count { min-width: 0; display: grid; }
+  .count small {
+    font: 800 12px var(--cond);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
     color: var(--muted);
   }
-  .style-count {
-    font: 500 clamp(34px, 11vw, 46px)/1.05 var(--mono);
+  .count strong {
+    font: 400 clamp(30px, 10vw, 42px)/1 var(--display);
     font-variant-numeric: tabular-nums;
-    letter-spacing: -0.02em;
-    overflow-wrap: anywhere;
+    white-space: nowrap;
+    text-shadow: 3px 3px 0 var(--yellow);
   }
-  .style-label { font-size: 13px; color: var(--muted); }
-  .style-label b { color: var(--teal); font-family: var(--mono); font-weight: 500; }
+  .rate {
+    flex: none;
+    padding: 6px 10px;
+    background: var(--blue);
+    color: var(--paper);
+    border: 2px solid var(--ink);
+    font: 800 16px var(--cond);
+    font-variant-numeric: tabular-nums;
+    transform: rotate(1.5deg);
+    box-shadow: 3px 3px 0 var(--ink);
+    white-space: nowrap;
+  }
 
-  /* ---------- Zone de la planche ---------- */
+  /* ---------- Scène ---------- */
   .stage {
     position: relative;
     flex: 0 0 auto;
-    height: clamp(210px, 36vh, 330px);
+    height: clamp(250px, 42vh, 390px);
     touch-action: none;
     cursor: pointer;
     overflow: hidden;
-    background:
-      radial-gradient(circle at 20% 30%, rgba(23,22,26,0.05) 0 2px, transparent 3px) 0 0 / 23px 23px,
-      radial-gradient(circle at 70% 60%, rgba(255,255,255,0.35) 0 1px, transparent 2px) 0 0 / 17px 17px;
+    border-bottom: 3px solid var(--ink);
+    background: var(--paper);
   }
-  .stage::after {
-    /* Joint de dilatation du béton */
-    content: "";
-    position: absolute;
-    left: 0; right: 0; top: 50%;
-    border-top: 2px solid rgba(23,22,26,0.08);
-    border-bottom: 1px solid rgba(255,255,255,0.45);
-    pointer-events: none;
-  }
+  #scene { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
   .board-wrap {
     position: absolute;
-    left: 50%; top: 50%;
-    width: min(78vw, 330px);
+    left: 50%; top: 79%;
+    width: min(58vw, 280px);
     aspect-ratio: 3.6;
     max-width: 100%;
     transform: translate(-50%, -50%);
-    perspective: 900px;
     pointer-events: none;
-    z-index: 1;
+    z-index: 2;
   }
+  .board-shadow {
+    position: absolute;
+    left: 8%; right: 8%; top: 40%; height: 42%;
+    border-radius: 50%;
+    background: rgba(20, 20, 20, 0.28);
+    filter: blur(5px);
+  }
+  .lift { position: absolute; inset: 0; perspective: 700px; }
+  .tilt { position: absolute; inset: 0; transform-style: preserve-3d; transform: rotateX(56deg); }
   .board { position: absolute; inset: 0; transform-style: preserve-3d; }
   .face {
     position: absolute;
     inset: 0;
     border-radius: 999px;
+    border: 3px solid var(--ink);
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
     overflow: hidden;
   }
+  /* Grip : évolue avec le niveau « Grip neuf » */
   .face.top {
+    --bolt: radial-gradient(circle, #8f8a80 0 2.4px, transparent 3px);
     background:
-      radial-gradient(circle, #8a8780 0 2.5px, transparent 3px) 22% 32% / 14px 14px no-repeat,
-      radial-gradient(circle, #8a8780 0 2.5px, transparent 3px) 22% 68% / 14px 14px no-repeat,
-      radial-gradient(circle, #8a8780 0 2.5px, transparent 3px) 26% 32% / 14px 14px no-repeat,
-      radial-gradient(circle, #8a8780 0 2.5px, transparent 3px) 26% 68% / 14px 14px no-repeat,
-      radial-gradient(circle, #8a8780 0 2.5px, transparent 3px) 74% 32% / 14px 14px no-repeat,
-      radial-gradient(circle, #8a8780 0 2.5px, transparent 3px) 74% 68% / 14px 14px no-repeat,
-      radial-gradient(circle, #8a8780 0 2.5px, transparent 3px) 78% 32% / 14px 14px no-repeat,
-      radial-gradient(circle, #8a8780 0 2.5px, transparent 3px) 78% 68% / 14px 14px no-repeat,
-      radial-gradient(circle, rgba(255,255,255,0.09) 0 0.8px, transparent 1.2px) 0 0 / 5px 5px,
-      var(--grip);
-    box-shadow: inset 0 0 0 3px #3a3840;
+      var(--bolt) 21% 30% / 12px 12px no-repeat, var(--bolt) 21% 70% / 12px 12px no-repeat,
+      var(--bolt) 25% 30% / 12px 12px no-repeat, var(--bolt) 25% 70% / 12px 12px no-repeat,
+      var(--bolt) 75% 30% / 12px 12px no-repeat, var(--bolt) 75% 70% / 12px 12px no-repeat,
+      var(--bolt) 79% 30% / 12px 12px no-repeat, var(--bolt) 79% 70% / 12px 12px no-repeat,
+      radial-gradient(circle, rgba(255,255,255,0.1) 0 0.8px, transparent 1.2px) 0 0 / 5px 5px,
+      var(--grip-band, linear-gradient(transparent, transparent)),
+      #1c1b1f;
   }
-  .face.top::after {
-    /* Sticker sur le grip */
-    content: "N";
+  .face.top.grip-1 { --grip-band: linear-gradient(90deg, transparent 44%, var(--pink) 44% 47%, transparent 47% 53%, var(--pink) 53% 56%, transparent 56%); }
+  .face.top.grip-2 { --grip-band: repeating-conic-gradient(#1c1b1f 0 25%, #f2eee3 0 50%) 50% 50% / 14px 14px; }
+  .face.top.grip-2::before {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(90deg, #1c1b1f 38%, transparent 38% 62%, #1c1b1f 62%);
+  }
+  .face.top.grip-3 { --grip-band: linear-gradient(110deg, transparent 20%, rgba(255,79,163,0.55) 35%, rgba(43,89,255,0.55) 50%, rgba(255,212,0,0.55) 65%, transparent 80%); }
+  .face.top.grip-4 { --grip-band: radial-gradient(circle, #ffd400 0 1.2px, transparent 1.8px) 0 0 / 7px 7px; }
+  .sticker {
     position: absolute;
     left: 50%; top: 50%;
     transform: translate(-50%, -50%) rotate(-8deg);
-    padding: 2px 9px;
-    background: var(--orange);
+    padding: 1px 8px;
+    background: var(--yellow);
+    border: 2px solid var(--ink);
     color: var(--ink);
-    font: 400 15px var(--display);
-    border-radius: 4px;
+    font: 400 13px var(--display);
+    z-index: 1;
   }
+  /* Chaussures pro : les pieds du rider apparaissent sur la planche */
+  .foot {
+    position: absolute;
+    top: 18%; height: 64%; width: 13%;
+    border-radius: 40% 40% 45% 45%;
+    border: 2px solid var(--ink);
+    background: var(--shoe, #f2eee3);
+    box-shadow: inset 0 -5px 0 var(--sole, #ff4fa3);
+    z-index: 2;
+  }
+  .foot.l { left: 22%; transform: rotate(-8deg); }
+  .foot.r { right: 22%; transform: rotate(10deg); }
+  .board.shoes-2 { --shoe: #ff4fa3; --sole: #f2eee3; }
+  .board.shoes-3 { --shoe: #ffd400; --sole: #141414; }
+  .board:not(.has-shoes) .foot { display: none; }
+  /* Dessous de la planche : le graphisme change avec le rang */
   .face.bottom {
     transform: rotateX(180deg);
-    background:
-      repeating-linear-gradient(-55deg, transparent 0 16px, rgba(23,22,26,0.12) 16px 22px),
-      var(--orange);
     display: grid;
     place-items: center;
-    box-shadow: inset 0 0 0 3px #c74108;
+    background: var(--pink);
   }
   .face.bottom span {
-    font: 400 clamp(16px, 5.5vw, 24px) var(--display);
-    letter-spacing: 0.08em;
+    font: 400 clamp(13px, 4.6vw, 20px) var(--display);
     color: var(--paper);
     text-shadow: 2px 2px 0 var(--ink);
+    position: relative;
+    z-index: 1;
   }
   .face.bottom i {
     position: absolute;
-    top: 14%; bottom: 14%;
-    width: 9%;
-    border-radius: 6px;
-    background: linear-gradient(90deg, #9b9a98, #e2e1dd 45%, #8d8c89);
-    box-shadow: 0 0 0 2px rgba(23,22,26,0.4);
+    top: 16%; bottom: 16%;
+    width: 8%;
+    border-radius: 5px;
+    background: #c9c6bf;
+    border: 2px solid var(--ink);
   }
-  .face.bottom i:nth-of-type(1) { left: 20%; }
-  .face.bottom i:nth-of-type(2) { right: 20%; }
+  .face.bottom i:nth-of-type(1) { left: 19%; }
+  .face.bottom i:nth-of-type(2) { right: 19%; }
   .face.bottom i::before, .face.bottom i::after {
     content: "";
     position: absolute;
-    left: -15%; right: -15%;
-    height: 26%;
+    left: -30%; right: -30%;
+    height: 30%;
     border-radius: 5px;
-    background: var(--paper);
-    box-shadow: 0 0 0 2px rgba(23,22,26,0.45);
+    background: var(--wheel, #f2eee3);
+    border: 2px solid var(--ink);
   }
-  .face.bottom i::before { top: -6%; }
-  .face.bottom i::after { bottom: -6%; }
-  .shadow {
+  .face.bottom i::before { top: -14%; }
+  .face.bottom i::after { bottom: -14%; }
+  .deck-1 { background: repeating-linear-gradient(-50deg, var(--yellow) 0 12px, var(--ink) 12px 16px) !important; }
+  .deck-2 { background: radial-gradient(circle, var(--pink) 0 2.5px, transparent 3px) 0 0 / 9px 9px, var(--blue) !important; }
+  .deck-3 { background: repeating-conic-gradient(var(--ink) 0 25%, var(--paper) 0 50%) 0 0 / 22px 22px !important; }
+  .deck-4 { background: repeating-conic-gradient(from 0deg at 50% 50%, var(--yellow) 0 10deg, var(--pink) 10deg 20deg) !important; }
+  .deck-5 { background: repeating-radial-gradient(circle at 50% 120%, var(--ink) 0 10px, var(--blue) 10px 20px, var(--pink) 20px 26px) !important; }
+  .deck-6 { background: linear-gradient(100deg, var(--pink), var(--yellow), #7ce8ff, var(--blue), var(--pink)) !important; }
+  .deck-7 { background: linear-gradient(100deg, #9c6b00, #ffe37a 30%, #c99400 55%, #fff1b0 75%, #9c6b00) !important; }
+
+  .combo {
     position: absolute;
-    left: 6%; right: 6%; bottom: -26%;
-    height: 22%;
-    border-radius: 50%;
-    background: rgba(23,22,26,0.22);
-    filter: blur(6px);
+    left: 12px; top: 10px;
+    z-index: 3;
+    padding: 6px 10px 5px;
+    background: var(--ink);
+    color: var(--yellow);
+    font: 400 15px var(--display);
+    transform: rotate(-3deg);
+    box-shadow: 3px 3px 0 var(--pink);
+    pointer-events: none;
+  }
+  .combo i {
+    display: block;
+    margin-top: 4px;
+    height: 4px;
+    background: var(--pink);
+    width: 0;
+    transition: width 0.12s linear;
   }
   .tap-hint {
     position: absolute;
-    left: 0; right: 0; bottom: 10px;
-    text-align: center;
-    font-size: 12px;
+    left: 50%; bottom: 8px;
+    transform: translateX(-50%);
+    z-index: 3;
+    padding: 4px 10px;
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    font: 800 13px var(--cond);
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--muted);
     pointer-events: none;
+    white-space: nowrap;
+    animation: nudge 1.2s ease-in-out infinite alternate;
   }
-  .combo {
-    position: absolute;
-    left: 16px; right: 16px; top: 8px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font: 500 13px var(--mono);
-    pointer-events: none;
-  }
-  .combo-bar { flex: 1; height: 6px; border-radius: 3px; background: rgba(23,22,26,0.12); overflow: hidden; }
-  .combo-bar i { display: block; height: 100%; width: 0; background: var(--orange); transition: width 0.12s linear; }
+  @keyframes nudge { to { transform: translateX(-50%) translateY(-4px); } }
   .pop {
     position: absolute;
-    z-index: 3;
+    z-index: 4;
     pointer-events: none;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%) rotate(var(--r, -3deg));
     text-align: center;
     white-space: nowrap;
-    padding: 4px 12px 5px;
-    border-radius: 12px;
-    background: rgba(244, 242, 237, 0.92);
-    box-shadow: 0 2px 8px rgba(23, 22, 26, 0.15);
-    animation: rise 0.9s ease-out forwards;
+    padding: 4px 10px 5px;
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    box-shadow: 3px 3px 0 var(--ink);
+    animation: rise 0.85s cubic-bezier(.2,.8,.3,1) forwards;
   }
-  .pop b { display: block; font: 400 20px var(--display); color: var(--ink); }
-  .pop span { font: 500 15px var(--mono); color: var(--teal); }
-  .pop.gold b { color: var(--gold); }
+  .pop b { display: block; font: 400 15px var(--display); color: var(--ink); }
+  .pop span { font: 800 16px var(--cond); color: var(--blue); }
+  .pop.gold { background: var(--yellow); }
   @keyframes rise {
-    from { opacity: 1; transform: translate(-50%, -50%); }
-    to { opacity: 0; transform: translate(-50%, -150%); }
+    0% { opacity: 0; transform: translate(-50%, -30%) rotate(var(--r, -3deg)) scale(0.6); }
+    15% { opacity: 1; transform: translate(-50%, -60%) rotate(var(--r, -3deg)) scale(1.08); }
+    100% { opacity: 0; transform: translate(-50%, -170%) rotate(var(--r, -3deg)) scale(1); }
   }
   .golden {
     position: absolute;
-    z-index: 4;
-    width: 74px; height: 22px;
+    z-index: 5;
+    width: 78px; height: 24px;
     border-radius: 999px;
-    border: 0;
+    border: 3px solid var(--ink);
     padding: 0;
     background: linear-gradient(90deg, #b88a00, #ffe37a 40%, #e0a800);
-    box-shadow: 0 0 0 3px rgba(255,255,255,0.7), 0 0 22px rgba(224,168,0,0.9);
+    box-shadow: 0 0 0 4px rgba(255,212,0,0.45), 0 0 26px rgba(255,212,0,0.9);
     cursor: pointer;
     animation: drift 9s linear forwards, wobble 0.6s ease-in-out infinite alternate;
   }
   @keyframes drift { from { left: -90px; } to { left: calc(100% + 20px); } }
-  @keyframes wobble { from { transform: rotate(-10deg); } to { transform: rotate(10deg); } }
+  @keyframes wobble { from { transform: rotate(-12deg); } to { transform: rotate(12deg); } }
 
   /* ---------- Boutique ---------- */
   .shop {
@@ -251,137 +332,195 @@
     min-height: 0;
     display: flex;
     flex-direction: column;
-    background: var(--paper);
-    border-radius: 22px 22px 0 0;
-    box-shadow: 0 -6px 20px rgba(23,22,26,0.08);
+    background: var(--paper-2);
   }
   .tabs {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 4px;
-    padding: 8px 12px 0;
+    gap: 6px;
+    padding: 10px 12px 8px;
   }
   .tab {
     position: relative;
     appearance: none;
-    border: 0;
-    background: none;
-    padding: 10px 4px 12px;
-    font: 600 14px var(--body);
-    color: var(--muted);
-    border-bottom: 3px solid transparent;
+    border: 2px solid var(--ink);
+    background: var(--paper);
+    padding: 9px 2px 8px;
+    font: 400 12px var(--display);
+    color: var(--ink);
     cursor: pointer;
+    box-shadow: 2px 2px 0 var(--ink);
   }
-  .tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--orange); }
+  .tab[aria-selected="true"] { background: var(--yellow); transform: translate(-1px, -1px) rotate(-1.5deg); box-shadow: 3px 3px 0 var(--ink); }
   .tab .dot {
     position: absolute;
-    top: 8px; right: 12%;
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--orange);
+    top: -6px; right: -5px;
+    min-width: 16px; height: 16px;
+    padding: 0 4px;
+    border-radius: 999px;
+    border: 2px solid var(--ink);
+    background: var(--pink);
+    font: 800 10px/12px var(--cond);
+    color: var(--ink);
   }
-  .buy-mode {
-    display: flex;
-    justify-content: flex-end;
-    gap: 6px;
-    padding: 8px 16px 0;
-  }
+  .buy-mode { display: flex; justify-content: flex-end; gap: 6px; padding: 0 14px 6px; }
   .buy-mode button {
     appearance: none;
-    border: 1.5px solid var(--concrete-dark);
-    background: none;
-    border-radius: 999px;
-    padding: 4px 12px;
-    font: 500 13px var(--mono);
-    color: var(--muted);
+    border: 2px solid var(--ink);
+    background: var(--paper);
+    padding: 3px 12px;
+    font: 800 14px var(--cond);
+    color: var(--ink);
     cursor: pointer;
   }
-  .buy-mode button[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+  .buy-mode button[aria-pressed="true"] { background: var(--ink); color: var(--yellow); }
   .list {
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    padding: 10px 16px calc(env(safe-area-inset-bottom, 0px) + 16px);
+    padding: 4px 14px calc(env(safe-area-inset-bottom, 0px) + 18px);
     display: grid;
     align-content: start;
-    gap: 10px;
+    gap: 12px;
   }
   .item {
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 46px 1fr auto;
     align-items: center;
     gap: 12px;
-    padding: 12px 12px 12px 14px;
-    border-radius: 14px;
-    background: #fff;
-    border: 1px solid #e4e1da;
+    padding: 12px;
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    box-shadow: 4px 4px 0 var(--ink);
   }
-  .item .info { min-width: 0; display: grid; gap: 3px; }
-  .item .name { font-weight: 800; font-size: 15px; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
-  .item .owned { font: 500 13px var(--mono); color: var(--teal); }
-  .item .desc { font-size: 13px; color: var(--muted); line-height: 1.35; }
-  .item.locked .name, .item.locked .desc { color: #a7a39a; }
-  .item.done { background: transparent; border-style: dashed; }
+  .badge {
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    border: 2px solid var(--ink);
+    display: grid;
+    place-items: center;
+    font: 400 11px var(--display);
+    background: var(--c, var(--yellow));
+    color: var(--ink);
+    transform: rotate(var(--r, -6deg));
+    text-align: center;
+    line-height: 1;
+  }
+  .item .info { min-width: 0; display: grid; gap: 4px; }
+  .item .name { font: 800 18px/1.05 var(--cond); text-transform: uppercase; letter-spacing: 0.01em; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+  .item .owned { font: 400 12px var(--display); color: var(--blue); }
+  .item .desc { font-size: 13px; color: var(--muted); line-height: 1.3; }
+  .item .meter { height: 7px; border: 1.5px solid var(--ink); background: var(--paper-2); }
+  .item .meter i { display: block; height: 100%; background: var(--blue); width: 0; }
+  .item.locked { box-shadow: none; border-style: dashed; background: transparent; }
+  .item.locked .badge { background: var(--paper-2); color: var(--muted); }
+  .item.locked .name, .item.locked .desc { color: #9a9486; }
+  .item.done { box-shadow: none; background: transparent; }
   .buy {
     appearance: none;
-    border: 0;
-    min-width: 92px;
-    padding: 10px 12px;
-    border-radius: 12px;
-    background: var(--ink);
-    color: var(--paper);
-    font: 500 14px var(--mono);
+    min-width: 84px;
+    padding: 8px 10px;
+    border: 2px solid var(--ink);
+    background: var(--pink);
+    color: var(--ink);
+    font: 800 17px var(--cond);
     font-variant-numeric: tabular-nums;
     cursor: pointer;
+    box-shadow: 3px 3px 0 var(--ink);
   }
-  .buy small { display: block; font: 600 10px var(--body); letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; }
-  .buy:disabled { background: var(--concrete); color: var(--muted); cursor: default; }
-  .buy.got { background: transparent; color: var(--teal); font-family: var(--body); font-weight: 800; }
-  button:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
+  .buy:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+  .buy small { display: block; font: 800 11px var(--cond); letter-spacing: 0.08em; }
+  .buy:disabled { background: var(--paper-2); color: #8d877a; box-shadow: none; border-style: dashed; cursor: default; }
+  .buy.got { background: none; border: 0; box-shadow: none; color: var(--blue); font: 400 12px var(--display); border-style: solid; }
+  button:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
 
-  .stats { display: grid; gap: 0; margin: 0; }
-  .stats div { display: flex; justify-content: space-between; gap: 12px; padding: 11px 2px; border-bottom: 1px solid #e4e1da; font-size: 14px; }
+  .stats { display: grid; margin: 0; background: var(--paper); border: 2px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); }
+  .stats div { display: flex; justify-content: space-between; gap: 12px; padding: 10px 12px; border-bottom: 1.5px solid var(--paper-2); font-size: 14px; }
+  .stats div:last-child { border-bottom: 0; }
   .stats dt { color: var(--muted); }
-  .stats dd { margin: 0; font: 500 14px var(--mono); text-align: right; }
+  .stats dd { margin: 0; font: 800 16px var(--cond); text-align: right; }
+  .ranks { display: grid; gap: 6px; margin: 4px 0 0; padding: 0; list-style: none; }
+  .ranks li { display: flex; justify-content: space-between; gap: 10px; padding: 8px 12px; border: 2px solid var(--ink); background: var(--paper); font: 800 15px var(--cond); text-transform: uppercase; }
+  .ranks li.now { background: var(--yellow); box-shadow: 3px 3px 0 var(--ink); }
+  .ranks li.future { border-style: dashed; color: #9a9486; background: transparent; }
+  .section-title { margin: 8px 0 0; font: 400 13px var(--display); }
   .danger {
-    margin-top: 18px;
+    margin-top: 10px;
     appearance: none;
-    border: 1.5px solid #c23b22;
+    border: 2px solid #b3261e;
     background: none;
-    color: #c23b22;
-    border-radius: 12px;
+    color: #b3261e;
     padding: 11px;
-    font: 600 14px var(--body);
+    font: 800 15px var(--cond);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
     cursor: pointer;
   }
-  .confirm { display: grid; gap: 8px; margin-top: 18px; padding: 14px; border-radius: 12px; background: #fde8e3; font-size: 14px; }
+  .confirm { display: grid; gap: 8px; padding: 14px; border: 2px solid #b3261e; background: #fde3dc; font-size: 14px; }
   .confirm .row { display: flex; gap: 8px; }
-  .confirm button { flex: 1; appearance: none; border: 0; border-radius: 10px; padding: 10px; font: 600 14px var(--body); cursor: pointer; }
-  .confirm .yes { background: #c23b22; color: #fff; }
-  .confirm .no { background: #fff; color: var(--ink); }
+  .confirm button { flex: 1; appearance: none; border: 2px solid var(--ink); padding: 10px; font: 800 15px var(--cond); text-transform: uppercase; cursor: pointer; }
+  .confirm .yes { background: #b3261e; color: #fff; }
+  .confirm .no { background: var(--paper); color: var(--ink); }
 
   .toast {
     position: fixed;
     left: 50%;
     bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
-    transform: translateX(-50%);
+    transform: translateX(-50%) rotate(-1deg);
     z-index: 10;
     width: min(92vw, 420px);
     padding: 12px 16px;
-    border-radius: 14px;
     background: var(--ink);
     color: var(--paper);
-    font-size: 14px;
-    line-height: 1.4;
+    border: 2px solid var(--ink);
+    box-shadow: 4px 4px 0 var(--pink);
+    font-size: 15px;
+    line-height: 1.35;
     text-align: center;
-    box-shadow: 0 8px 24px rgba(23,22,26,0.25);
   }
-  .toast b { color: var(--orange); font-family: var(--mono); font-weight: 500; }
+  .toast b { color: var(--yellow); font-weight: 700; }
+
+  .rankup {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    display: grid;
+    place-items: center;
+    padding: 24px 16px;
+    background: rgba(20, 20, 20, 0.45);
+  }
+  .rankup-card {
+    width: min(100%, 340px);
+    padding: 22px 20px 20px;
+    background: var(--yellow);
+    border: 3px solid var(--ink);
+    box-shadow: 8px 8px 0 var(--pink);
+    text-align: center;
+    display: grid;
+    gap: 10px;
+    animation: slam 0.45s cubic-bezier(.2,1.6,.4,1) both;
+  }
+  @keyframes slam { from { transform: scale(1.8) rotate(8deg); opacity: 0; } to { transform: scale(1) rotate(-3deg); opacity: 1; } }
+  .rankup-card small { font: 800 13px var(--cond); letter-spacing: 0.2em; text-transform: uppercase; }
+  .rankup-card strong { font: 400 clamp(28px, 9vw, 38px)/1 var(--display); text-wrap: balance; }
+  .rankup-card p { margin: 0; font-size: 14px; line-height: 1.4; }
+  .rankup-card button {
+    justify-self: center;
+    appearance: none;
+    border: 2px solid var(--ink);
+    background: var(--ink);
+    color: var(--yellow);
+    padding: 10px 22px;
+    font: 400 14px var(--display);
+    cursor: pointer;
+  }
 
   @media (prefers-reduced-motion: reduce) {
     .pop { animation-duration: 0.01s; }
     .golden { animation: drift 9s linear forwards; }
+    .tap-hint { animation: none; }
+    .rankup-card { animation: none; transform: rotate(-3deg); }
   }
 </style>
 <!-- ARTIFACT-HEAD-END -->
@@ -389,21 +528,34 @@
 <body>
 <div class="app">
   <header class="top">
-    <div class="brand">NEUTRON SKATE</div>
-    <div class="style-count" id="style">0</div>
-    <div class="style-label">points de style · <b id="rate">0</b> par seconde</div>
+    <div class="rank-row">
+      <div class="rank-chip" id="rankName">Débutant</div>
+      <div class="rank-progress">
+        <div class="bar"><i id="rankBar"></i></div>
+        <span id="rankNext">Prochain rang : Local du spot</span>
+      </div>
+    </div>
+    <div class="count-row">
+      <div class="count">
+        <small>Points de style</small>
+        <strong id="style">0</strong>
+      </div>
+      <div class="rate"><span id="rate">0</span>/s</div>
+    </div>
   </header>
 
   <section class="stage" id="stage" aria-label="Tape sur la planche pour faire une figure">
-    <div class="combo" id="comboBox" hidden>
-      <span id="comboText">Combo ×1,00</span>
-      <div class="combo-bar"><i id="comboFill"></i></div>
-    </div>
+    <canvas id="scene"></canvas>
+    <div class="combo" id="comboBox" hidden><span id="comboText">Combo ×1,00</span><i id="comboFill"></i></div>
     <div class="board-wrap">
-      <div class="shadow" id="shadow"></div>
-      <div class="board" id="board">
-        <div class="face top"></div>
-        <div class="face bottom"><span>NEUTRON</span><i></i><i></i></div>
+      <div class="board-shadow" id="shadow"></div>
+      <div class="lift" id="lift">
+        <div class="tilt">
+          <div class="board" id="board">
+            <div class="face top" id="grip"><span class="sticker">N</span><span class="foot l"></span><span class="foot r"></span></div>
+            <div class="face bottom" id="deck"><span>NEUTRON</span><i></i><i></i></div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="tap-hint" id="hint">Tape sur la planche</div>
@@ -414,66 +566,91 @@
       <button class="tab" role="tab" type="button" data-tab="tricks" aria-selected="true">Figures<span class="dot" hidden></span></button>
       <button class="tab" role="tab" type="button" data-tab="gear" aria-selected="false">Matos<span class="dot" hidden></span></button>
       <button class="tab" role="tab" type="button" data-tab="crew" aria-selected="false">Crew<span class="dot" hidden></span></button>
-      <button class="tab" role="tab" type="button" data-tab="stats" aria-selected="false">Stats</button>
+      <button class="tab" role="tab" type="button" data-tab="stats" aria-selected="false">Profil</button>
     </div>
     <div class="buy-mode" id="buyMode" hidden>
       <button type="button" data-n="1" aria-pressed="true">×1</button>
       <button type="button" data-n="10" aria-pressed="false">×10</button>
-      <button type="button" data-n="max" aria-pressed="false">Max</button>
+      <button type="button" data-n="max" aria-pressed="false">MAX</button>
     </div>
     <div class="list" id="list"></div>
   </section>
 </div>
 <div class="toast" id="toast" hidden></div>
+<div class="rankup" id="rankup" hidden>
+  <div class="rankup-card">
+    <small>Nouveau rang</small>
+    <strong id="rankupName">Amateur</strong>
+    <p id="rankupText"></p>
+    <button type="button" id="rankupOk">Let's go</button>
+  </div>
+</div>
 
 <script>
 (() => {
   "use strict";
 
+  const C = { paper: "#f2eee3", paper2: "#e8e2d3", ink: "#141414", pink: "#ff4fa3", blue: "#2b59ff", yellow: "#ffd400", concrete: "#cfc9bc", concrete2: "#b6af9f" };
+
   // ================= Données du jeu =================
-  // Figures : achat unique, chaque figure multiplie les points gagnés par tape.
   const TRICKS = [
-    { id: "ollie",      name: "Ollie",        cost: 0,   mult: 1, desc: "La base. On décolle la planche du sol." },
-    { id: "kickflip",   name: "Kickflip",     cost: 50,  mult: 2, desc: "La planche tourne sur elle-même." },
-    { id: "heelflip",   name: "Heelflip",     cost: 600, mult: 2, desc: "Le kickflip, mais avec le talon." },
-    { id: "shoveit",    name: "Pop Shove-it", cost: 6e3, mult: 2, desc: "La planche pivote à 180° sous tes pieds." },
-    { id: "treflip",    name: "360 Flip",     cost: 7e4, mult: 3, desc: "Kickflip + shove-it 360. Le tre flip." },
-    { id: "hardflip",   name: "Hardflip",     cost: 8e5, mult: 3, desc: "Un flip vertical entre les jambes." },
-    { id: "impossible", name: "Impossible",   cost: 1e7, mult: 4, desc: "La planche s'enroule autour du pied." },
-    { id: "nine",       name: "900",          cost: 2e8, mult: 5, desc: "Deux tours et demi en l'air. Légendaire." },
+    { id: "ollie",      name: "Ollie",        tag: "OL",  cost: 0,   mult: 1, desc: "La base. On décolle la planche du sol." },
+    { id: "kickflip",   name: "Kickflip",     tag: "KF",  cost: 50,  mult: 2, desc: "La planche tourne sur son grand axe." },
+    { id: "heelflip",   name: "Heelflip",     tag: "HF",  cost: 600, mult: 2, desc: "Le kickflip à l'envers, avec le talon." },
+    { id: "shoveit",    name: "Pop Shove-it", tag: "PS",  cost: 6e3, mult: 2, desc: "La planche pivote à 180° sous tes pieds." },
+    { id: "treflip",    name: "360 Flip",     tag: "360", cost: 7e4, mult: 3, desc: "Kickflip + shove-it 360. Le tre flip." },
+    { id: "hardflip",   name: "Hardflip",     tag: "HD",  cost: 8e5, mult: 3, desc: "Un flip vertical entre les jambes." },
+    { id: "impossible", name: "Impossible",   tag: "IMP", cost: 1e7, mult: 4, desc: "La planche s'enroule autour du pied." },
+    { id: "nine",       name: "900",          tag: "900", cost: 2e8, mult: 5, desc: "Deux tours et demi en l'air. Légendaire." },
   ];
-  // Matos : améliorations à niveaux pour la tape.
   const GEAR = [
-    { id: "grip",     name: "Grip neuf",         base: 10,   growth: 1.55, max: 200, desc: (l) => `+1 point de base par tape (actuel : ${1 + l})` },
-    { id: "bearings", name: "Roulements ABEC 9", base: 250,  growth: 4,    max: 6,   desc: (l) => `Combo max ×${fmtMult(comboCap(l + 1))} au prochain niveau` },
-    { id: "wax",      name: "Wax pour curb",     base: 3000, growth: 3,    max: 10,  desc: (l) => `Chaque tape rapporte aussi ${(l + 1) * 2} % de ta production par seconde` },
-    { id: "shoes",    name: "Chaussures pro",    base: 5e4,  growth: 6,    max: 8,   desc: (l) => `Les automatisations produisent +25 % (actuel : +${l * 25} %)` },
+    { id: "grip",     name: "Grip neuf",         tag: "GRP", base: 10,   growth: 1.55, max: 200, tiers: [5, 15, 40, 100],
+      desc: (l) => `+1 point de base par tape (actuel : ${1 + l}). Nouveau grip aux niveaux 5, 15, 40 et 100.` },
+    { id: "bearings", name: "Roulements ABEC 9", tag: "ABC", base: 250,  growth: 4,    max: 6, tiers: [1, 3, 5],
+      desc: (l) => `Combo max ×${fmtMult(comboCap(l + 1))} au prochain niveau. Les roues changent de couleur.` },
+    { id: "wax",      name: "Wax pour curb",     tag: "WAX", base: 3000, growth: 3,    max: 10, tiers: [1, 4, 8],
+      desc: (l) => `Chaque tape rapporte aussi ${(l + 1) * 2} % de ta production par seconde. Le curb brille.` },
+    { id: "shoes",    name: "Chaussures pro",    tag: "SHO", base: 5e4,  growth: 6,    max: 8, tiers: [1, 4, 7],
+      desc: (l) => `+25 % de production du crew (actuel : +${l * 25} %). Tes pieds apparaissent sur la planche.` },
   ];
-  // Crew : automatisations, produisent des points de style chaque seconde.
   const CREW = [
-    { id: "pote",   name: "Pote qui filme",          base: 15,    rate: 0.3,   desc: "Il filme tes figures et les partage." },
-    { id: "park",   name: "Abonnement au skatepark", base: 120,   rate: 2,     desc: "Tu t'entraînes même quand tu ne tapes pas." },
-    { id: "insta",  name: "Compte Insta",            base: 1300,  rate: 12,    desc: "Tes clips tournent tout seuls." },
-    { id: "shop",   name: "Sponsor du skateshop",    base: 1.4e4, rate: 70,    desc: "Planches gratuites et pub en vitrine." },
-    { id: "video",  name: "Part vidéo",              base: 1.6e5, rate: 400,   desc: "Ta part dans la vidéo du crew." },
-    { id: "team",   name: "Team pro",                base: 2e6,   rate: 2500,  desc: "Tu tournes avec une team internationale." },
-    { id: "brand",  name: "Ta propre marque",        base: 3e7,   rate: 1.5e4, desc: "Tes planches se vendent dans le monde entier." },
-    { id: "xgames", name: "Contest international",   base: 5e8,   rate: 1e5,   desc: "Médailles, caméras et foule en délire." },
+    { id: "pote",   name: "Pote qui filme",          tag: "CAM", color: C.yellow, base: 15,    rate: 0.3,   desc: "Il filme tes lignes depuis le bord du spot." },
+    { id: "park",   name: "Abonnement au skatepark", tag: "PRK", color: C.blue,   base: 120,   rate: 2,     desc: "Des modules apparaissent dans ton spot." },
+    { id: "insta",  name: "Compte Insta",            tag: "IG",  color: C.pink,   base: 1300,  rate: 12,    desc: "Tes clips tournent et les likes pleuvent." },
+    { id: "shop",   name: "Sponsor du skateshop",    tag: "SHP", color: C.yellow, base: 1.4e4, rate: 70,    desc: "Le shop du quartier ouvre derrière le spot." },
+    { id: "video",  name: "Part vidéo",              tag: "VID", color: C.blue,   base: 1.6e5, rate: 400,   desc: "Une équipe tournage installe ses caméras." },
+    { id: "team",   name: "Team pro",                tag: "TM",  color: C.pink,   base: 2e6,   rate: 2500,  desc: "Les pros de ta team roulent avec toi." },
+    { id: "brand",  name: "Ta propre marque",        tag: "BRD", color: C.yellow, base: 3e7,   rate: 1.5e4, desc: "Ton logo s'affiche en géant au-dessus du spot." },
+    { id: "xgames", name: "Contest international",   tag: "WC",  color: C.blue,   base: 5e8,   rate: 1e5,   desc: "Gradins, foule et confettis : c'est la finale." },
   ];
   const CREW_GROWTH = 1.15;
-  const MILESTONES = [10, 25, 50, 100, 200]; // chaque palier double la production de l'automatisation
+  const MILESTONES = [10, 25, 50, 100, 200];
+  const RANKS = [
+    { name: "Débutant",      at: 0,    sun: C.pink },
+    { name: "Local du spot", at: 300,  sun: C.yellow },
+    { name: "Amateur",       at: 5e3,  sun: C.blue },
+    { name: "Flow",          at: 1e5,  sun: C.pink },
+    { name: "Sponsorisé",    at: 2e6,  sun: C.yellow },
+    { name: "Pro",           at: 5e7,  sun: C.blue },
+    { name: "Légende",       at: 2e9,  sun: C.pink },
+    { name: "Icône",         at: 1e11, sun: C.yellow },
+  ];
+  const RANK_BONUS = 0.15;
 
   // ================= État et sauvegarde =================
   const SAVE_KEY = "neutron-skate.save.v1";
   const fresh = () => ({
-    style: 0, total: 0, taps: 0, bestCombo: 0, goldens: 0,
+    style: 0, total: 0, taps: 0, bestCombo: 0, goldens: 0, rank: 0,
     tricks: { ollie: true }, gear: {}, crew: {},
     started: Date.now(), lastSave: Date.now(),
   });
   let S = fresh();
   try {
     const raw = localStorage.getItem(SAVE_KEY);
-    if (raw) S = Object.assign(fresh(), JSON.parse(raw));
+    if (raw) {
+      S = Object.assign(fresh(), JSON.parse(raw));
+      if (S.rank === undefined) S.rank = 0;
+    }
   } catch { /* pas de sauvegarde disponible */ }
   const save = () => {
     S.lastSave = Date.now();
@@ -484,12 +661,17 @@
   const lvl = (id) => S.gear[id] || 0;
   const owned = (id) => S.crew[id] || 0;
   const comboCap = (l) => 1.5 + l * 0.5;
+  const rankIndex = (total) => RANKS.reduce((idx, r, i) => (total >= r.at ? i : idx), 0);
+  const rankMult = () => 1 + S.rank * RANK_BONUS;
   const trickMult = () => TRICKS.reduce((m, t) => (S.tricks[t.id] ? m * t.mult : m), 1);
   const milestoneMult = (n) => 2 ** MILESTONES.filter((m) => n >= m).length;
   const nextMilestone = (n) => MILESTONES.find((m) => n < m);
-  const crewRate = (c) => c.rate * owned(c.id) * milestoneMult(owned(c.id)) * (1 + lvl("shoes") * 0.25);
+  const crewUnitRate = (c, n = owned(c.id)) => c.rate * milestoneMult(n) * (1 + lvl("shoes") * 0.25) * rankMult();
+  const crewRate = (c) => crewUnitRate(c) * owned(c.id);
   const perSecond = () => CREW.reduce((sum, c) => sum + crewRate(c), 0);
-  const tapBase = () => (1 + lvl("grip")) * trickMult() + perSecond() * lvl("wax") * 0.02;
+  const tapBase = () => ((1 + lvl("grip")) * trickMult()) * rankMult() + perSecond() * lvl("wax") * 0.02;
+  const tierOf = (value, tiers) => tiers.filter((t) => value >= t).length;
+  const crewTier = (n) => (n <= 0 ? 0 : n < 10 ? 1 : n < 25 ? 2 : n < 50 ? 3 : 4);
 
   const gearCost = (g) => Math.ceil(g.base * g.growth ** lvl(g.id));
   const crewCost = (c, n) => {
@@ -514,40 +696,428 @@
     const digits = v < 10 ? 2 : v < 100 ? 1 : 0;
     return (Math.floor(v * 10 ** digits) / 10 ** digits).toFixed(digits).replace(".", ",") + UNITS[tier];
   }
-  function fmtMult(x) { return x.toFixed(2).replace(".", ","); }
+  const fmtMult = (x) => x.toFixed(2).replace(".", ",");
   function fmtDuration(ms) {
     const s = Math.floor(ms / 1000), h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
     return h ? `${h} h ${String(m).padStart(2, "0")}` : m ? `${m} min ${String(s % 60).padStart(2, "0")}` : `${s} s`;
   }
+  const rand = (a, b) => a + Math.random() * (b - a);
 
   // ================= Éléments =================
   const $ = (id) => document.getElementById(id);
   const el = {
-    style: $("style"), rate: $("rate"), stage: $("stage"), board: $("board"), shadow: $("shadow"),
-    hint: $("hint"), comboBox: $("comboBox"), comboText: $("comboText"), comboFill: $("comboFill"),
+    style: $("style"), rate: $("rate"), stage: $("stage"), board: $("board"), lift: $("lift"), shadow: $("shadow"),
+    grip: $("grip"), deck: $("deck"), hint: $("hint"), comboBox: $("comboBox"), comboText: $("comboText"), comboFill: $("comboFill"),
     list: $("list"), buyMode: $("buyMode"), toast: $("toast"),
+    rankName: $("rankName"), rankBar: $("rankBar"), rankNext: $("rankNext"),
+    rankup: $("rankup"), rankupName: $("rankupName"), rankupText: $("rankupText"),
   };
   const gain = (n) => { S.style += n; S.total += n; };
 
+  // ================= Scène du spot (canvas) =================
+  const cv = $("scene"), cx = cv.getContext("2d");
+  const layer = document.createElement("canvas"), lx = layer.getContext("2d");
+  let W = 0, H = 0, DPR = 1, G = 0, sceneKey = "";
+  const fx = { floats: [], sparks: [], confetti: [], hearts: [], flashes: [] };
+
+  function resizeScene() {
+    const r = el.stage.getBoundingClientRect();
+    W = Math.round(r.width); H = Math.round(r.height);
+    DPR = Math.min(window.devicePixelRatio || 1, 2.5);
+    for (const c of [cv, layer]) { c.width = Math.round(W * DPR); c.height = Math.round(H * DPR); }
+    G = Math.round(H * 0.6);
+    sceneKey = "";
+  }
+
+  const sceneState = () => ({
+    rank: S.rank,
+    park: crewTier(owned("park")), shop: crewTier(owned("shop")), video: crewTier(owned("video")),
+    brand: crewTier(owned("brand")), xgames: crewTier(owned("xgames")),
+    wax: tierOf(lvl("wax"), GEAR[2].tiers),
+  });
+
+  function ink(c, fill, build, lw = 2.5) {
+    c.beginPath();
+    build();
+    if (fill) { c.fillStyle = fill; c.fill(); }
+    c.lineWidth = lw;
+    c.strokeStyle = C.ink;
+    c.lineJoin = "round";
+    c.stroke();
+  }
+
+  function drawStatic(st) {
+    const c = lx;
+    c.setTransform(DPR, 0, 0, DPR, 0, 0);
+    c.clearRect(0, 0, W, H);
+    c.fillStyle = C.paper;
+    c.fillRect(0, 0, W, H);
+
+    // Trame de points riso, plus dense en haut
+    c.fillStyle = "rgba(43, 89, 255, 0.14)";
+    for (let y = 6, row = 0; y < G; y += 11, row++) {
+      const r = 0.6 + 2 * (1 - y / G);
+      for (let x = row % 2 ? 5.5 : 0; x < W; x += 11) { c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fill(); }
+    }
+    // Grand soleil : sa couleur change avec le rang
+    const sunR = Math.min(W, H) * 0.24;
+    c.fillStyle = RANKS[st.rank].sun;
+    c.beginPath(); c.arc(W * 0.5, G * 0.55, sunR, 0, Math.PI * 2); c.fill();
+    c.save();
+    c.beginPath(); c.arc(W * 0.5, G * 0.55, sunR, 0, Math.PI * 2); c.clip();
+    c.fillStyle = C.paper;
+    for (let i = 0; i < 4; i++) c.fillRect(W * 0.5 - sunR, G * 0.55 + sunR * (0.15 + i * 0.22), sunR * 2, 3 + i * 2);
+    c.restore();
+
+    // Contest : gradins et guirlande de fanions
+    if (st.xgames) {
+      for (let i = 0; i < 3; i++) {
+        const y = G * (0.42 + i * 0.17);
+        ink(c, i % 2 ? C.blue : "#4a72ff", () => c.rect(-4, y, W + 8, G * 0.17), 2);
+      }
+      c.strokeStyle = C.ink; c.lineWidth = 1.5;
+      c.beginPath(); c.moveTo(0, 14); c.quadraticCurveTo(W / 2, 40, W, 14); c.stroke();
+      for (let x = 10, i = 0; x < W; x += 26, i++) {
+        const t = x / W, y = 14 + 52 * t * (1 - t);
+        ink(c, [C.pink, C.yellow, C.blue][i % 3], () => { c.moveTo(x - 8, y); c.lineTo(x + 8, y); c.lineTo(x, y + 16); c.closePath(); }, 1.5);
+      }
+    }
+    // Panneau publicitaire de ta marque
+    if (st.brand) {
+      const bx = W * 0.04, by = H * 0.08, bw = W * 0.42, bh = H * 0.17;
+      c.fillStyle = C.ink;
+      c.fillRect(bx + bw * 0.2, by + bh, 5, G - by - bh);
+      c.fillRect(bx + bw * 0.75, by + bh, 5, G - by - bh);
+      ink(c, C.blue, () => c.rect(bx, by, bw, bh), 3);
+      const fs = Math.min(bh * 0.42, bw / 6.2);
+      c.font = `400 ${fs}px Bungee, "Arial Black", sans-serif`;
+      c.textAlign = "center"; c.textBaseline = "middle";
+      c.fillStyle = C.pink; c.fillText("NEUTRON", bx + bw / 2 + 2.5, by + bh / 2 + 2.5);
+      c.fillStyle = C.paper; c.fillText("NEUTRON", bx + bw / 2, by + bh / 2);
+      if (st.brand >= 3) for (let i = 0; i < 4; i++) ink(c, C.yellow, () => c.arc(bx + bw * (0.15 + i * 0.23), by - 4, 4, 0, Math.PI * 2), 1.5);
+    }
+    // Skateshop sponsor
+    if (st.shop) {
+      const sx = W * 0.6, sw = W * 0.37, sy = G * 0.38;
+      ink(c, C.yellow, () => c.rect(sx, sy, sw, G - sy), 3);
+      ink(c, C.ink, () => c.rect(sx - 4, sy - 16, sw + 8, 18), 2);
+      c.font = `400 ${Math.min(12, sw / 9)}px Bungee, sans-serif`;
+      c.textAlign = "center"; c.textBaseline = "middle";
+      c.fillStyle = st.shop >= 2 ? C.pink : C.paper;
+      c.fillText("SKATE SHOP", sx + sw / 2, sy - 6);
+      if (st.shop >= 2) { c.shadowColor = C.pink; c.shadowBlur = 10; c.fillText("SKATE SHOP", sx + sw / 2, sy - 6); c.shadowBlur = 0; }
+      for (let i = 0; i < 6; i++) {
+        c.fillStyle = i % 2 ? C.paper : C.pink;
+        c.fillRect(sx + (sw / 6) * i, sy + 2, sw / 6, 10);
+      }
+      c.strokeStyle = C.ink; c.lineWidth = 2; c.strokeRect(sx, sy + 2, sw, 10);
+      const wy = sy + 18, wh = G - wy - 8;
+      ink(c, "#bfe0ff", () => c.rect(sx + 8, wy, sw - 16, wh), 2);
+      const decks = Math.min(2 + st.shop, 6);
+      for (let i = 0; i < decks; i++) {
+        const dx = sx + 14 + i * ((sw - 28) / decks);
+        ink(c, [C.pink, C.blue, C.yellow][i % 3], () => c.roundRect(dx, wy + 5, (sw - 28) / decks - 5, wh - 10, 6), 1.5);
+      }
+    }
+
+    // Sol en béton avec joints en perspective
+    c.fillStyle = C.concrete;
+    c.fillRect(0, G, W, H - G);
+    c.strokeStyle = "rgba(20,20,20,0.18)"; c.lineWidth = 1.5;
+    for (let i = -4; i <= 4; i++) {
+      c.beginPath(); c.moveTo(W / 2 + i * W * 0.12, G); c.lineTo(W / 2 + i * W * 0.32, H); c.stroke();
+    }
+    c.beginPath(); c.moveTo(0, G + (H - G) * 0.45); c.lineTo(W, G + (H - G) * 0.45); c.stroke();
+    c.strokeStyle = C.ink; c.lineWidth = 3;
+    c.beginPath(); c.moveTo(0, G); c.lineTo(W, G); c.stroke();
+
+    // Modules du skatepark
+    if (st.park) {
+      const qw = W * 0.22, qh = G * 0.5;
+      ink(c, C.concrete2, () => { c.moveTo(0, G); c.lineTo(0, G - qh); c.quadraticCurveTo(0, G, qw, G); c.closePath(); }, 3);
+      c.strokeStyle = st.park >= 2 ? C.blue : C.ink; c.lineWidth = 5;
+      c.beginPath(); c.moveTo(0, G - qh); c.lineTo(10, G - qh); c.stroke();
+      if (st.park >= 2) {
+        const fx0 = W * 0.76, fh = G * 0.13;
+        ink(c, C.concrete2, () => { c.moveTo(fx0, G); c.lineTo(fx0 + W * 0.06, G - fh); c.lineTo(W + 4, G - fh); c.lineTo(W + 4, G); c.closePath(); }, 3);
+      }
+      if (st.park >= 3) {
+        c.strokeStyle = C.ink; c.lineWidth = 3;
+        c.beginPath(); c.moveTo(W * 0.8, G - G * 0.13 - 14); c.lineTo(W + 4, G - G * 0.13 - 14); c.stroke();
+        for (const px of [W * 0.84, W * 0.95]) { c.beginPath(); c.moveTo(px, G - G * 0.13 - 14); c.lineTo(px, G - G * 0.13); c.stroke(); }
+      }
+      if (st.park >= 4) {
+        c.save(); c.translate(qw * 0.3, G - qh * 0.35); c.rotate(-0.25);
+        c.font = "400 16px Bungee, sans-serif"; c.fillStyle = C.pink; c.textAlign = "center";
+        c.fillText("SK8", 0, 0); c.restore();
+      }
+    }
+    // Curb (ledge) derrière la planche, brillant avec le wax
+    const lx0 = W * 0.27, lw = W * 0.46, lh = Math.max(14, (H - G) * 0.18), ly = G + (H - G) * 0.12;
+    ink(c, C.concrete2, () => c.rect(lx0, ly, lw, lh), 2.5);
+    ink(c, "#ddd8cc", () => c.rect(lx0, ly - 6, lw, 6), 2.5);
+    if (st.wax) {
+      c.fillStyle = st.wax >= 2 ? C.pink : "rgba(255,255,255,0.9)";
+      c.fillRect(lx0 + 8, ly - 4.5, lw * (0.3 + st.wax * 0.2), 3);
+    }
+    // Caméras de la part vidéo
+    if (st.video) {
+      const camX = W * 0.9, foot = H - 6;
+      c.fillStyle = "rgba(255, 212, 0, 0.28)";
+      c.beginPath(); c.moveTo(camX - 10, foot - 64); c.lineTo(W * 0.62, H * 0.66); c.lineTo(W * 0.62, H * 0.95); c.closePath(); c.fill();
+      c.strokeStyle = C.ink; c.lineWidth = 2.5;
+      for (const dx of [-14, 0, 14]) { c.beginPath(); c.moveTo(camX, foot - 50); c.lineTo(camX + dx, foot); c.stroke(); }
+      ink(c, C.ink, () => c.roundRect(camX - 16, foot - 72, 30, 22, 3), 2);
+      ink(c, C.blue, () => c.arc(camX - 18, foot - 61, 7, 0, Math.PI * 2), 2);
+      if (st.video >= 3) {
+        c.strokeStyle = C.ink; c.lineWidth = 3;
+        c.beginPath(); c.moveTo(W * 0.04, H); c.lineTo(W * 0.1, G - 10); c.lineTo(W * 0.3, G - 40); c.stroke();
+        ink(c, C.ink, () => c.roundRect(W * 0.3 - 10, G - 50, 24, 18, 3), 2);
+      }
+    }
+  }
+
+  function person(c, x, foot, s, shirt, opts = {}) {
+    c.save();
+    c.translate(x, foot);
+    c.scale(s, s);
+    c.fillStyle = C.ink;
+    c.fillRect(-7, -26, 5, 26);
+    c.fillRect(2, -26, 5, 26);
+    ink(c, shirt, () => c.roundRect(-11, -54, 22, 30, 8), 2.5);
+    ink(c, C.paper, () => c.arc(0, -63, 9, 0, Math.PI * 2), 2.5);
+    c.fillStyle = opts.cap || C.ink;
+    c.beginPath(); c.arc(0, -65, 9.5, Math.PI, 0); c.fill();
+    c.fillRect(opts.flip ? -15 : 0, -67, 15, 3.5);
+    if (opts.cam) {
+      ink(c, C.ink, () => c.roundRect(7, -52, 15, 11, 2), 1.5);
+      c.fillStyle = opts.blink ? "#ff2a2a" : "#5a1010";
+      c.beginPath(); c.arc(19, -49, 2, 0, Math.PI * 2); c.fill();
+    }
+    if (opts.board) {
+      ink(c, opts.board, () => c.roundRect(-20, 0, 40, 6, 3), 2);
+      c.fillStyle = C.ink;
+      c.beginPath(); c.arc(-12, 9, 3, 0, Math.PI * 2); c.arc(12, 9, 3, 0, Math.PI * 2); c.fill();
+    }
+    c.restore();
+  }
+
+  // Positions des éléments du crew dans la scène (pour les gains qui s'envolent)
+  function anchor(id) {
+    switch (id) {
+      case "pote": return { x: W * 0.12, y: H * 0.7 };
+      case "park": return { x: W * 0.08, y: G * 0.62 };
+      case "insta": return { x: W * 0.88, y: H * 0.14 };
+      case "shop": return { x: W * 0.78, y: G * 0.5 };
+      case "video": return { x: W * 0.88, y: H * 0.68 };
+      case "team": return { x: W * 0.5, y: G - 40 };
+      case "brand": return { x: W * 0.25, y: H * 0.16 };
+      case "xgames": return { x: W * 0.5, y: G * 0.35 };
+      default: return { x: W / 2, y: H / 2 };
+    }
+  }
+
+  let heartTimer = 0, prodTimer = 0;
+  function drawScene(t, dt) {
+    const st = sceneState();
+    const key = JSON.stringify(st) + W + "x" + H;
+    if (key !== sceneKey) { sceneKey = key; drawStatic(st); }
+    cx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    cx.clearRect(0, 0, W, H);
+    cx.drawImage(layer, 0, 0, W, H);
+
+    // Foule du contest
+    if (st.xgames) {
+      const rows = 3, per = Math.ceil(W / 16);
+      const fill = Math.min(1, 0.35 + st.xgames * 0.17);
+      for (let r = 0; r < rows; r++) {
+        const y = G * (0.42 + r * 0.17) - 2;
+        for (let i = 0; i < per; i++) {
+          if (((i * 7 + r * 13) % 10) / 10 > fill) continue;
+          const x = i * 16 + (r % 2) * 8 + 4;
+          // Pas de spectateurs devant le shop ni devant le panneau
+          if (st.shop && x > W * 0.6 - 8 && x < W * 0.97 + 8 && y > G * 0.38 - 20) continue;
+          if (st.brand && x > W * 0.04 - 8 && x < W * 0.46 + 8 && y < H * 0.25 + 8) continue;
+          const bob = Math.max(0, Math.sin(t * 6 + i * 0.9 + r)) * 4;
+          cx.fillStyle = [C.pink, C.yellow, C.paper][(i + r) % 3];
+          cx.beginPath(); cx.arc(x, y - bob, 5.5, 0, Math.PI * 2); cx.fill();
+          cx.lineWidth = 1.5; cx.strokeStyle = C.ink; cx.stroke();
+        }
+      }
+    }
+    // Pros de la team qui roulent au fond
+    const team = Math.min(4, owned("team"));
+    for (let i = 0; i < team; i++) {
+      const speed = 40 + i * 13, span = W + 120;
+      const dir = i % 2 ? -1 : 1;
+      let x = ((t * speed + i * span / team) % span) - 60;
+      if (dir < 0) x = W - x;
+      person(cx, x, G - 2, 0.55, [C.pink, C.blue, C.yellow, C.paper][i], { board: C.yellow, cap: C.blue, flip: dir < 0 });
+    }
+    // Étincelles du wax sur le curb
+    if (st.wax) {
+      const lx0 = W * 0.27, ly = G + (H - G) * 0.12 - 4;
+      for (let i = 0; i < st.wax * 2; i++) {
+        const a = Math.max(0, Math.sin(t * 3 + i * 2.1));
+        if (a < 0.6) continue;
+        const x = lx0 + 10 + ((i * 53) % Math.max(20, W * 0.44));
+        cx.fillStyle = `rgba(255,255,255,${a})`;
+        star(cx, x, ly, 2 + a * 3);
+      }
+    }
+    // Potes qui filment
+    const potes = Math.min(4, Math.ceil(owned("pote") / 5));
+    for (let i = 0; i < potes; i++) {
+      person(cx, W * (0.07 + i * 0.075), H - 8 - (i % 2) * 6, 0.72, [C.yellow, C.pink, C.blue, C.paper][i], { cam: true, blink: Math.sin(t * 4 + i) > 0 });
+    }
+    // Téléphone Insta et pluie de likes
+    if (owned("insta")) {
+      const a = anchor("insta");
+      cx.save(); cx.translate(a.x, a.y); cx.rotate(0.12);
+      ink(cx, C.ink, () => cx.roundRect(-14, -22, 28, 44, 5), 2);
+      ink(cx, C.pink, () => cx.roundRect(-10, -17, 20, 32, 2), 1.5);
+      heart(cx, 0, 0, 6, C.paper);
+      cx.restore();
+      heartTimer -= dt;
+      if (heartTimer <= 0) {
+        heartTimer = 1.4 / Math.min(6, 1 + owned("insta") / 5);
+        fx.hearts.push({ x: a.x + rand(-10, 10), y: a.y - 20, vx: rand(-14, 14), life: 1 });
+      }
+    }
+    for (const h of fx.hearts) {
+      h.y -= 34 * dt; h.x += h.vx * dt; h.life -= dt * 0.6;
+      cx.globalAlpha = Math.max(0, h.life);
+      heart(cx, h.x, h.y, 5, C.pink);
+    }
+    cx.globalAlpha = 1;
+    fx.hearts = fx.hearts.filter((h) => h.life > 0);
+
+    // Gains automatiques qui s'envolent de chaque membre du crew
+    prodTimer -= dt;
+    if (prodTimer <= 0) {
+      prodTimer = 1;
+      CREW.forEach((c) => {
+        if (!owned(c.id)) return;
+        const a = anchor(c.id);
+        fx.floats.push({ x: a.x + rand(-8, 8), y: a.y, text: "+" + fmt(crewRate(c)), life: 1, color: c.color });
+      });
+    }
+    cx.textAlign = "center"; cx.textBaseline = "middle";
+    cx.font = '800 15px "Barlow Condensed", "Arial Narrow", sans-serif';
+    for (const f of fx.floats) {
+      f.y -= 26 * dt; f.life -= dt * 0.8;
+      cx.globalAlpha = Math.max(0, Math.min(1, f.life * 1.5));
+      cx.lineWidth = 4; cx.strokeStyle = C.paper; cx.strokeText(f.text, f.x, f.y);
+      cx.fillStyle = C.ink; cx.fillText(f.text, f.x, f.y);
+    }
+    cx.globalAlpha = 1;
+    fx.floats = fx.floats.filter((f) => f.life > 0);
+
+    // Anneaux qui signalent un nouvel élément dans le spot
+    for (const fl of fx.flashes) {
+      fl.life -= dt * 0.5;
+      const a = anchor(fl.id);
+      const pr = 1 - fl.life;
+      cx.globalAlpha = Math.max(0, fl.life);
+      cx.strokeStyle = C.pink; cx.lineWidth = 4;
+      cx.beginPath(); cx.arc(a.x, a.y, 14 + pr * 50, 0, Math.PI * 2); cx.stroke();
+      cx.strokeStyle = C.ink; cx.lineWidth = 2;
+      cx.beginPath(); cx.arc(a.x, a.y, 8 + pr * 36, 0, Math.PI * 2); cx.stroke();
+    }
+    cx.globalAlpha = 1;
+    fx.flashes = fx.flashes.filter((f) => f.life > 0);
+
+    // Étincelles des roues
+    for (const s of fx.sparks) {
+      s.x += s.vx * dt; s.y += s.vy * dt; s.vy += 500 * dt; s.life -= dt * 2;
+      cx.globalAlpha = Math.max(0, s.life);
+      cx.fillStyle = s.color;
+      cx.fillRect(s.x - 2, s.y - 2, 4, 4);
+    }
+    cx.globalAlpha = 1;
+    fx.sparks = fx.sparks.filter((s) => s.life > 0);
+
+    // Confettis
+    for (const p of fx.confetti) {
+      p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 260 * dt; p.vx *= 0.99; p.rot += p.vr * dt; p.life -= dt * 0.45;
+      cx.save(); cx.translate(p.x, p.y); cx.rotate(p.rot);
+      cx.globalAlpha = Math.max(0, Math.min(1, p.life * 2));
+      cx.fillStyle = p.color; cx.fillRect(-4, -2.5, 8, 5);
+      cx.restore();
+    }
+    cx.globalAlpha = 1;
+    fx.confetti = fx.confetti.filter((p) => p.life > 0 && p.y < H + 20);
+    if (st.xgames >= 2 && Math.random() < dt * 1.5) confettiBurst(rand(0, W), -10, 6, 120);
+  }
+
+  function heart(c, x, y, s, color) {
+    c.fillStyle = color;
+    c.beginPath();
+    c.moveTo(x, y + s);
+    c.bezierCurveTo(x - s * 1.8, y - s * 0.4, x - s * 0.6, y - s * 1.6, x, y - s * 0.5);
+    c.bezierCurveTo(x + s * 0.6, y - s * 1.6, x + s * 1.8, y - s * 0.4, x, y + s);
+    c.fill();
+    c.lineWidth = 1.2; c.strokeStyle = C.ink; c.stroke();
+  }
+  function star(c, x, y, r) {
+    c.beginPath();
+    for (let i = 0; i < 8; i++) {
+      const rr = i % 2 ? r * 0.35 : r, a = (i * Math.PI) / 4;
+      c.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr);
+    }
+    c.closePath(); c.fill();
+  }
+  function confettiBurst(x, y, n, power) {
+    for (let i = 0; i < n; i++) {
+      const a = rand(-Math.PI, 0), v = rand(0.3, 1) * power;
+      fx.confetti.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, rot: rand(0, 6), vr: rand(-8, 8), life: 1, color: [C.pink, C.yellow, C.blue, C.ink][i % 4] });
+    }
+  }
+  const WHEEL_COLORS = [C.paper, C.yellow, C.pink, C.blue];
+  function wheelSparks() {
+    const t = tierOf(lvl("bearings"), GEAR[1].tiers);
+    if (!t) return;
+    const color = WHEEL_COLORS[t];
+    for (let i = 0; i < 4 + t * 3; i++) {
+      fx.sparks.push({ x: W / 2 + rand(-W * 0.2, W * 0.2), y: H * 0.82, vx: rand(-120, 120), vy: rand(-220, -60), life: 1, color });
+    }
+  }
+
+  // ================= Apparence de la planche =================
+  let lookKey = "";
+  function applyBoardLook() {
+    const grip = tierOf(lvl("grip"), GEAR[0].tiers);
+    const wheels = tierOf(lvl("bearings"), GEAR[1].tiers);
+    const shoes = tierOf(lvl("shoes"), GEAR[3].tiers);
+    const key = `${grip}-${wheels}-${shoes}-${S.rank}`;
+    if (key === lookKey) return;
+    lookKey = key;
+    el.grip.className = "face top" + (grip ? ` grip-${grip}` : "");
+    el.deck.className = "face bottom" + (S.rank ? ` deck-${S.rank}` : "");
+    el.deck.style.setProperty("--wheel", WHEEL_COLORS[wheels]);
+    el.board.className = "board" + (shoes ? ` has-shoes shoes-${shoes}` : "");
+  }
+
   // ================= Tape sur la planche =================
-  const T = (y, s, z, x, yy) => ({ transform: `translateY(${y}px) scale(${s}) rotateZ(${z}deg) rotateX(${x}deg) rotateY(${yy}deg)` });
+  const R = (z, x, y) => ({ transform: `rotateZ(${z}deg) rotateX(${x}deg) rotateY(${y}deg)` });
   const ANIMS = {
-    ollie:      [T(0, 1, 0, 0, 0), T(-46, 1.16, -7, 0, 0), T(0, 1, 0, 0, 0)],
-    kickflip:   [T(0, 1, 0, 0, 0), T(-52, 1.18, -4, 180, 0), T(0, 1, 0, 360, 0)],
-    heelflip:   [T(0, 1, 0, 0, 0), T(-52, 1.18, 4, -180, 0), T(0, 1, 0, -360, 0)],
-    shoveit:    [T(0, 1, 0, 0, 0), T(-48, 1.16, 90, 0, 0), T(0, 1, 180, 0, 0)],
-    treflip:    [T(0, 1, 0, 0, 0), T(-60, 1.22, 180, 180, 0), T(0, 1, 360, 360, 0)],
-    hardflip:   [T(0, 1, 0, 0, 0), T(-60, 1.22, 90, 180, 90), T(0, 1, 180, 360, 180)],
-    impossible: [T(0, 1, 0, 0, 0), T(-62, 1.24, 0, 0, 180), T(0, 1, 0, 0, 360)],
-    nine:       [T(0, 1, 0, 0, 0), T(-70, 1.28, 450, 0, 0), T(0, 1, 900, 0, 0)],
+    ollie:      [R(0, 0, 0), R(-8, -18, 0), R(0, 0, 0)],
+    kickflip:   [R(0, 0, 0), R(-4, 180, 0), R(0, 360, 0)],
+    heelflip:   [R(0, 0, 0), R(4, -180, 0), R(0, -360, 0)],
+    shoveit:    [R(0, 0, 0), R(90, -10, 0), R(180, 0, 0)],
+    treflip:    [R(0, 0, 0), R(180, 180, 0), R(360, 360, 0)],
+    hardflip:   [R(0, 0, 0), R(90, 180, 90), R(180, 360, 180)],
+    impossible: [R(0, 0, 0), R(0, 0, 180), R(0, 0, 360)],
+    nine:       [R(0, 0, 0), R(450, 0, 0), R(900, 0, 0)],
   };
-  let combo = 0, comboUntil = 0, boardAnim = null;
+  const LIFT = { ollie: 40, kickflip: 52, heelflip: 52, shoveit: 46, treflip: 62, hardflip: 62, impossible: 64, nine: 76 };
+  let combo = 0, comboUntil = 0, boardAnim = null, liftAnim = null;
   const COMBO_WINDOW = 1100;
   const comboMult = () => Math.min(comboCap(lvl("bearings")), 1 + combo * 0.03);
+  const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   function pickTrick() {
     const learned = TRICKS.filter((t) => S.tricks[t.id]);
-    // Les figures les plus récentes sortent plus souvent
     const weights = learned.map((_, i) => i + 1);
     let r = Math.random() * weights.reduce((a, b) => a + b, 0);
     for (let i = 0; i < learned.length; i++) { r -= weights[i]; if (r <= 0) return learned[i]; }
@@ -559,34 +1129,44 @@
     p.className = "pop" + (gold ? " gold" : "");
     p.style.left = x + "px";
     p.style.top = y + "px";
-    p.innerHTML = `<b></b><span></span>`;
+    p.style.setProperty("--r", rand(-6, 6).toFixed(1) + "deg");
+    p.innerHTML = "<b></b><span></span>";
     p.firstChild.textContent = title;
     p.lastChild.textContent = "+" + fmt(amount);
     el.stage.appendChild(p);
-    setTimeout(() => p.remove(), 950);
+    setTimeout(() => p.remove(), 900);
   }
 
   function tap(e) {
     const now = performance.now();
     combo = now < comboUntil ? combo + 1 : 0;
     comboUntil = now + COMBO_WINDOW;
-    const mult = comboMult();
     S.bestCombo = Math.max(S.bestCombo, combo);
-    const amount = tapBase() * mult;
+    const amount = tapBase() * comboMult();
     gain(amount);
     S.taps += 1;
 
     const trick = pickTrick();
-    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (!reduce) {
-      boardAnim?.cancel();
-      boardAnim = el.board.animate(ANIMS[trick.id], { duration: 520, easing: "cubic-bezier(.2,.7,.3,1)" });
-      el.shadow.animate([{ transform: "scale(1)", opacity: 1 }, { transform: "scale(.6)", opacity: 0.5, offset: 0.45 }, { transform: "scale(1)", opacity: 1 }], { duration: 520 });
+    if (!reduceMotion()) {
+      boardAnim?.cancel(); liftAnim?.cancel();
+      const h = LIFT[trick.id];
+      liftAnim = el.lift.animate([
+        { transform: "translateY(0) scale(1)" },
+        { transform: `translateY(${-h}px) scale(1.12)`, offset: 0.45 },
+        { transform: "translateY(0) scale(1)" },
+      ], { duration: 540, easing: "cubic-bezier(.2,.7,.3,1)" });
+      boardAnim = el.board.animate(ANIMS[trick.id], { duration: 540, easing: "cubic-bezier(.25,.6,.3,1)" });
+      el.shadow.animate([{ transform: "scale(1)", opacity: 1 }, { transform: "scale(.55)", opacity: 0.4, offset: 0.45 }, { transform: "scale(1)", opacity: 1 }], { duration: 540 });
+      setTimeout(wheelSparks, 480);
+      if (combo && combo % 15 === 0) {
+        el.stage.animate([{ transform: "translate(0,0)" }, { transform: "translate(-4px,2px)" }, { transform: "translate(4px,-2px)" }, { transform: "translate(0,0)" }], { duration: 220 });
+        confettiBurst(W / 2, H * 0.75, 18, 260);
+      }
     }
     const rect = el.stage.getBoundingClientRect();
     const x = Math.min(Math.max(e.clientX - rect.left, 70), rect.width - 70);
-    const y = Math.min(Math.max(e.clientY - rect.top, 50), rect.height - 30);
-    popText(x, y - 20, trick.name, amount);
+    const y = Math.min(Math.max(e.clientY - rect.top, 70), rect.height - 40);
+    popText(x, y - 30, trick.name, amount);
     try { navigator.vibrate?.(8); } catch { /* non supporté */ }
     el.hint.hidden = true;
   }
@@ -596,14 +1176,14 @@
     tap(e);
   });
 
-  // ================= Planche dorée (bonus aléatoire) =================
+  // ================= Planche dorée =================
   let nextGolden = Date.now() + 40000 + Math.random() * 40000;
   function spawnGolden() {
     const b = document.createElement("button");
     b.type = "button";
     b.className = "golden";
     b.setAttribute("aria-label", "Planche dorée : tape pour un bonus");
-    b.style.top = 20 + Math.random() * 50 + "%";
+    b.style.top = 15 + Math.random() * 40 + "%";
     b.addEventListener("pointerdown", (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -611,7 +1191,9 @@
       gain(reward);
       S.goldens += 1;
       const rect = el.stage.getBoundingClientRect();
-      popText(e.clientX - rect.left, e.clientY - rect.top, "Planche dorée !", reward, true);
+      const x = e.clientX - rect.left, y = e.clientY - rect.top;
+      popText(Math.min(Math.max(x, 80), rect.width - 80), y, "Planche dorée !", reward, true);
+      confettiBurst(x, y, 30, 300);
       try { navigator.vibrate?.([15, 30, 15]); } catch { /* non supporté */ }
       b.remove();
     });
@@ -619,21 +1201,48 @@
     el.stage.appendChild(b);
   }
 
-  // ================= Boutique =================
-  let tab = "tricks", buyN = 1;
-  let rows = [];
+  // ================= Rangs =================
+  function updateRank() {
+    const idx = rankIndex(S.total);
+    if (idx > S.rank) {
+      S.rank = idx;
+      save();
+      el.rankupName.textContent = RANKS[idx].name;
+      el.rankupText.textContent = `Bonus de rang : +${Math.round(idx * RANK_BONUS * 100)} % sur tout ton style. Nouveau graphisme sous la planche et nouveau soleil sur ton spot.`;
+      el.rankup.hidden = false;
+      confettiBurst(W / 2, H * 0.6, 60, 380);
+      try { navigator.vibrate?.([20, 40, 20, 40, 60]); } catch { /* non supporté */ }
+    }
+    const cur = RANKS[S.rank], next = RANKS[S.rank + 1];
+    el.rankName.textContent = cur.name;
+    if (next) {
+      const p = Math.min(1, (S.total - cur.at) / (next.at - cur.at));
+      el.rankBar.style.width = (p * 100).toFixed(1) + "%";
+      el.rankNext.textContent = `Prochain rang : ${next.name} · ${Math.floor(p * 100)} %`;
+    } else {
+      el.rankBar.style.width = "100%";
+      el.rankNext.textContent = "Rang maximum atteint";
+    }
+  }
+  $("rankupOk").addEventListener("click", () => { el.rankup.hidden = true; });
+  el.rankup.addEventListener("click", (e) => { if (e.target === el.rankup) el.rankup.hidden = true; });
 
-  function itemRow(name, onBuy) {
+  // ================= Boutique =================
+  let tab = "tricks", buyN = 1, rows = [], statsEls = null;
+
+  function itemRow(badge, color, onBuy, withMeter) {
     const row = document.createElement("div");
     row.className = "item";
-    row.innerHTML = `<div class="info"><div class="name"><span></span><span class="owned"></span></div><div class="desc"></div></div><button type="button" class="buy"></button>`;
-    row.querySelector(".name span").textContent = name;
+    row.innerHTML = `<div class="badge"></div><div class="info"><div class="name"><span></span><span class="owned"></span></div><div class="desc"></div>${withMeter ? '<div class="meter"><i></i></div>' : ""}</div><button type="button" class="buy"></button>`;
+    const b = row.querySelector(".badge");
+    b.textContent = badge;
+    b.style.setProperty("--c", color);
+    b.style.setProperty("--r", rand(-10, 8).toFixed(0) + "deg");
     const btn = row.querySelector(".buy");
     btn.addEventListener("click", () => { onBuy(); save(); refresh(true); });
     el.list.appendChild(row);
-    return { row, btn, ownedEl: row.querySelector(".owned"), descEl: row.querySelector(".desc"), nameEl: row.querySelector(".name span") };
+    return { row, btn, badge: b, ownedEl: row.querySelector(".owned"), descEl: row.querySelector(".desc"), nameEl: row.querySelector(".name span"), meter: row.querySelector(".meter i") };
   }
-
   const isNextTrick = (t) => TRICKS.find((x) => !S.tricks[x.id]) === t;
 
   function buildList() {
@@ -643,17 +1252,19 @@
     rows = [];
     statsEls = null;
     if (tab === "tricks") {
-      TRICKS.forEach((t) => {
-        const r = itemRow(t.name, () => {
+      TRICKS.forEach((t, i) => {
+        const r = itemRow(t.tag, [C.yellow, C.pink, C.blue][i % 3], () => {
           if (S.tricks[t.id] || S.style < t.cost) return;
           S.style -= t.cost;
           S.tricks[t.id] = true;
           toast(`Nouvelle figure : <b>${t.name}</b>. Tes tapes valent ×${t.mult}.`);
+          confettiBurst(W / 2, H * 0.75, 24, 280);
         });
         r.update = () => {
           const got = !!S.tricks[t.id];
           const visible = got || S.total >= t.cost * 0.3 || isNextTrick(t);
           r.nameEl.textContent = visible ? t.name : "Figure secrète";
+          r.badge.textContent = visible ? t.tag : "?";
           r.ownedEl.textContent = t.mult > 1 ? `×${t.mult}` : "";
           r.descEl.textContent = visible ? t.desc : "Gagne plus de style pour la découvrir.";
           r.row.classList.toggle("locked", !visible);
@@ -663,19 +1274,24 @@
         rows.push(r);
       });
     } else if (tab === "gear") {
-      GEAR.forEach((g) => {
-        const r = itemRow(g.name, () => {
+      GEAR.forEach((g, i) => {
+        const r = itemRow(g.tag, [C.pink, C.yellow, C.blue, C.pink][i], () => {
           const c = gearCost(g);
           if (lvl(g.id) >= g.max || S.style < c) return;
+          const before = tierOf(lvl(g.id), g.tiers);
           S.style -= c;
           S.gear[g.id] = lvl(g.id) + 1;
-        });
+          if (tierOf(lvl(g.id), g.tiers) > before) toast(`<b>${g.name}</b> : regarde ta planche !`);
+        }, true);
         r.update = () => {
           const l = lvl(g.id), maxed = l >= g.max, c = gearCost(g);
           const visible = l > 0 || S.total >= g.base * 0.3;
           r.nameEl.textContent = visible ? g.name : "???";
+          r.badge.textContent = visible ? g.tag : "?";
           r.ownedEl.textContent = l ? `niv. ${l}` : "";
           r.descEl.textContent = !visible ? "Gagne plus de style pour le découvrir." : maxed ? "Niveau maximum atteint." : g.desc(l);
+          r.meter.style.width = (l / g.max) * 100 + "%";
+          r.meter.parentElement.hidden = !visible;
           r.row.classList.toggle("locked", !visible);
           r.row.classList.toggle("done", maxed);
           setBtn(r.btn, maxed || !visible ? null : c, S.style >= c, maxed ? "Max" : "—");
@@ -684,27 +1300,38 @@
       });
     } else if (tab === "crew") {
       CREW.forEach((c, i) => {
-        const r = itemRow(c.name, () => {
+        const r = itemRow(c.tag, c.color, () => {
           const n = buyN === "max" ? crewMaxAffordable(c) : buyN;
           const cost = crewCost(c, n);
           if (n < 1 || S.style < cost) return;
           const before = owned(c.id);
           S.style -= cost;
           S.crew[c.id] = before + n;
-          if (milestoneMult(before + n) > milestoneMult(before)) toast(`<b>${c.name}</b> : production doublée !`);
-        });
+          if (before === 0) {
+            fx.flashes.push({ id: c.id, life: 1 });
+            toast(`Nouveau dans ton spot : <b>${c.name}</b>`);
+          } else if (milestoneMult(before + n) > milestoneMult(before)) {
+            fx.flashes.push({ id: c.id, life: 1 });
+            toast(`<b>${c.name}</b> : production doublée !`);
+          } else if (crewTier(before + n) > crewTier(before)) {
+            fx.flashes.push({ id: c.id, life: 1 });
+          }
+        }, true);
         r.update = () => {
           const n = owned(c.id);
           const visible = n > 0 || i === 0 || S.total >= c.base * 0.4 || owned(CREW[i - 1].id) > 0;
           const qty = buyN === "max" ? Math.max(1, crewMaxAffordable(c)) : buyN;
           const cost = crewCost(c, qty);
           const next = nextMilestone(n);
-          const each = c.rate * milestoneMult(n) * (1 + lvl("shoes") * 0.25);
+          const prev = [...MILESTONES].reverse().find((m) => n >= m) || 0;
           r.nameEl.textContent = visible ? c.name : "???";
+          r.badge.textContent = visible ? c.tag : "?";
           r.ownedEl.textContent = n ? `×${n}` : "";
           r.descEl.textContent = visible
-            ? `${c.desc} ${fmt(each)}/s chacun${n ? ` · total ${fmt(crewRate(c))}/s` : ""}${next ? ` · ×2 à ${next}` : ""}`
+            ? `${c.desc} ${fmt(crewUnitRate(c))}/s chacun${n ? ` · total ${fmt(crewRate(c))}/s` : ""}${next ? ` · ×2 à ${next}` : ""}`
             : "Continue de rider pour débloquer.";
+          r.meter.style.width = next ? ((n - prev) / (next - prev)) * 100 + "%" : "100%";
+          r.meter.parentElement.hidden = !visible;
           r.row.classList.toggle("locked", !visible);
           setBtn(r.btn, visible ? cost : null, S.style >= cost, "—", qty > 1 ? `×${qty}` : "");
         };
@@ -722,25 +1349,28 @@
     if (btn._html !== html) { btn.innerHTML = html; btn._html = html; }
   }
 
-  let statsEls = null;
   function buildStats() {
     el.list.innerHTML = `
       <dl class="stats">
         <div><dt>Style gagné au total</dt><dd data-s="total"></dd></div>
         <div><dt>Points par tape</dt><dd data-s="tap"></dd></div>
         <div><dt>Production par seconde</dt><dd data-s="rate"></dd></div>
+        <div><dt>Bonus de rang</dt><dd data-s="bonus"></dd></div>
         <div><dt>Tapes sur la planche</dt><dd data-s="taps"></dd></div>
         <div><dt>Meilleur combo</dt><dd data-s="combo"></dd></div>
         <div><dt>Figures apprises</dt><dd data-s="tricks"></dd></div>
         <div><dt>Planches dorées attrapées</dt><dd data-s="goldens"></dd></div>
         <div><dt>Temps depuis le début</dt><dd data-s="time"></dd></div>
       </dl>
+      <p class="section-title">Les rangs</p>
+      <ul class="ranks" id="ranksList"></ul>
       <button type="button" class="danger" id="resetBtn">Recommencer de zéro</button>
       <div class="confirm" id="confirmBox" hidden>
-        <span>Tout ton style, tes figures et ton crew seront effacés. Recommencer ?</span>
+        <span>Tout ton style, tes figures, ton matos et ton crew seront effacés. Recommencer ?</span>
         <div class="row"><button type="button" class="no" id="noBtn">Annuler</button><button type="button" class="yes" id="yesBtn">Tout effacer</button></div>
       </div>`;
     statsEls = Object.fromEntries([...el.list.querySelectorAll("[data-s]")].map((d) => [d.dataset.s, d]));
+    statsEls.ranks = $("ranksList");
     const box = $("confirmBox"), reset = $("resetBtn");
     reset.addEventListener("click", () => { box.hidden = false; reset.hidden = true; });
     $("noBtn").addEventListener("click", () => { box.hidden = true; reset.hidden = false; });
@@ -749,45 +1379,65 @@
       save();
       combo = 0;
       el.hint.hidden = false;
+      lookKey = ""; sceneKey = "";
       buildList();
       refresh(true);
       toast("Nouvelle partie. Un ollie pour commencer !");
     });
   }
+  let ranksKey = "";
   function updateStats() {
     if (!statsEls) return;
     statsEls.total.textContent = fmt(S.total);
     statsEls.tap.textContent = fmt(tapBase());
     statsEls.rate.textContent = fmt(perSecond()) + "/s";
+    statsEls.bonus.textContent = `+${Math.round(S.rank * RANK_BONUS * 100)} %`;
     statsEls.taps.textContent = S.taps.toLocaleString("fr-FR");
     statsEls.combo.textContent = S.bestCombo;
     statsEls.tricks.textContent = `${TRICKS.filter((t) => S.tricks[t.id]).length} / ${TRICKS.length}`;
     statsEls.goldens.textContent = S.goldens;
     statsEls.time.textContent = fmtDuration(Date.now() - S.started);
+    if (ranksKey !== String(S.rank) || !statsEls.ranks.children.length) {
+      ranksKey = String(S.rank);
+      statsEls.ranks.innerHTML = "";
+      RANKS.forEach((r, i) => {
+        const li = document.createElement("li");
+        li.className = i === S.rank ? "now" : i > S.rank ? "future" : "";
+        li.innerHTML = "<span></span><span></span>";
+        li.firstChild.textContent = i > S.rank + 1 ? "???" : r.name;
+        li.lastChild.textContent = i === 0 ? "Départ" : fmt(r.at);
+        statsEls.ranks.appendChild(li);
+      });
+    }
   }
 
   function updateTabDots() {
-    const canTrick = TRICKS.some((t) => !S.tricks[t.id] && S.style >= t.cost);
-    const canGear = GEAR.some((g) => lvl(g.id) < g.max && S.style >= gearCost(g) && S.total >= g.base * 0.3);
-    const canCrew = CREW.some((c) => S.style >= crewCost(c, 1));
+    const counts = {
+      tricks: TRICKS.filter((t) => !S.tricks[t.id] && S.style >= t.cost).length,
+      gear: GEAR.filter((g) => lvl(g.id) < g.max && S.style >= gearCost(g) && S.total >= g.base * 0.3).length,
+      crew: CREW.filter((c) => S.style >= crewCost(c, 1)).length,
+    };
     document.querySelectorAll(".tab").forEach((t) => {
       const dot = t.querySelector(".dot");
       if (!dot) return;
-      const on = { tricks: canTrick, gear: canGear, crew: canCrew }[t.dataset.tab];
-      dot.hidden = !on || t.dataset.tab === tab;
+      const n = counts[t.dataset.tab];
+      dot.hidden = !n || t.dataset.tab === tab;
+      dot.textContent = n;
     });
   }
 
   let lastRefresh = 0;
   function refresh(force) {
     el.style.textContent = fmt(S.style);
-    el.rate.textContent = fmt(perSecond());
+    el.rate.textContent = "+" + fmt(perSecond());
     const now = performance.now();
     if (!force && now - lastRefresh < 200) return;
     lastRefresh = now;
     rows.forEach((r) => r.update());
     updateStats();
     updateTabDots();
+    updateRank();
+    applyBoardLook();
   }
 
   document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () => {
@@ -818,7 +1468,7 @@
     last = now;
     gain(perSecond() * dt);
 
-    if (performance.now() > comboUntil) combo = 0;
+    if (now > comboUntil) combo = 0;
     const showCombo = combo >= 3;
     el.comboBox.hidden = !showCombo;
     if (showCombo) {
@@ -826,17 +1476,16 @@
       el.comboText.textContent = `Combo ×${fmtMult(comboMult())}`;
       el.comboFill.style.width = ((comboMult() - 1) / (cap - 1)) * 100 + "%";
     }
-
     if (Date.now() > nextGolden) {
       nextGolden = Date.now() + 45000 + Math.random() * 75000;
       if (!document.hidden) spawnGolden();
     }
     if (Date.now() - lastSaveAt > 5000) { save(); lastSaveAt = Date.now(); }
     refresh(false);
+    drawScene(now / 1000, dt);
     requestAnimationFrame(frame);
   }
 
-  // Gains pendant l'absence (50 % de la production, 8 h maximum)
   function offlineGains() {
     const away = Math.min(Date.now() - S.lastSave, 8 * 3600 * 1000);
     const earned = perSecond() * (away / 1000) * 0.5;
@@ -850,8 +1499,13 @@
     else { offlineGains(); last = performance.now(); save(); }
   });
   addEventListener("pagehide", save);
+  addEventListener("resize", resizeScene);
   document.addEventListener("gesturestart", (e) => e.preventDefault());
+  document.fonts?.ready.then(() => { sceneKey = ""; });
 
+  // Un ancien joueur garde son rang sans revoir toutes les célébrations
+  S.rank = Math.max(S.rank, rankIndex(S.total));
+  resizeScene();
   offlineGains();
   buildList();
   refresh(true);
