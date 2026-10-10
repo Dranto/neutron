@@ -17,11 +17,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Barlow+Condensed:wght@600;800&family=Barlow:wght@500;700&display=swap">
 <style>
-  /* Identité « zine de skate imprimé en risographie » :
-     papier crème, encre noire épaisse, rose fluo, bleu riso, jaune,
-     cartes autocollants avec ombre dure. Une seule ambiance claire assumée.
-     Mise en page : en-tête (rang + compteur), scène du spot qui évolue,
-     boutique en onglets. */
+  /* Identité « zine de skate en risographie » : papier crème, encre épaisse,
+     rose fluo, bleu riso, jaune, cartes autocollants à ombre dure.
+     Mise en page : en-tête compact, jeu de ride plein cadre,
+     panneau d'améliorations redimensionnable (glisser la poignée). */
   :root {
     --paper: #f2eee3;
     --paper-2: #e8e2d3;
@@ -29,7 +28,7 @@
     --pink: #ff4fa3;
     --blue: #2b59ff;
     --yellow: #ffd400;
-    --concrete: #cfc9bc;
+    --red: #e5322d;
     --muted: #5f5a50;
     --display: "Bungee", "Arial Black", Impact, sans-serif;
     --cond: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
@@ -53,308 +52,217 @@
   body { overflow: hidden; }
   .app {
     height: 100%;
-    max-width: 560px;
+    max-width: 640px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
     background: var(--paper);
+    position: relative;
   }
 
   /* ---------- En-tête ---------- */
   .top {
-    padding: calc(env(safe-area-inset-top, 0px) + 10px) 16px 10px;
+    flex: none;
+    padding: calc(env(safe-area-inset-top, 0px) + 8px) 14px 8px;
     display: grid;
-    gap: 8px;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas: "rank count rate" "bar bar bar";
+    align-items: center;
+    gap: 6px 12px;
     border-bottom: 3px solid var(--ink);
     background: var(--paper);
-    position: relative;
     z-index: 3;
   }
-  .rank-row { display: flex; align-items: center; gap: 12px; min-width: 0; }
   .rank-chip {
-    flex: none;
-    padding: 5px 10px 4px;
+    grid-area: rank;
+    padding: 5px 9px 4px;
     background: var(--ink);
     color: var(--yellow);
-    font: 400 13px var(--display);
-    letter-spacing: 0.02em;
+    font: 400 12px var(--display);
     transform: rotate(-2.5deg);
     box-shadow: 3px 3px 0 var(--pink);
-  }
-  .rank-progress { flex: 1; min-width: 0; display: grid; gap: 4px; }
-  .rank-progress .bar { height: 10px; border: 2px solid var(--ink); background: var(--paper-2); overflow: hidden; }
-  .rank-progress .bar i {
-    display: block; height: 100%; width: 0;
-    background: repeating-linear-gradient(-45deg, var(--pink) 0 6px, #ff7dbc 6px 12px);
-    transition: width 0.3s ease-out;
-  }
-  .rank-progress span {
-    font: 600 12px var(--cond);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--muted);
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
-  .count-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; }
-  .count { min-width: 0; display: grid; }
-  .count small {
-    font: 800 12px var(--cond);
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
+  .count { grid-area: count; min-width: 0; display: grid; justify-items: center; line-height: 1; }
   .count strong {
-    font: 400 clamp(30px, 10vw, 42px)/1 var(--display);
+    font: 400 clamp(24px, 7.5vw, 32px)/1 var(--display);
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
-    text-shadow: 3px 3px 0 var(--yellow);
+    text-shadow: 2px 2px 0 var(--yellow);
   }
+  .count small { font: 800 10px var(--cond); letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
   .rate {
-    flex: none;
-    padding: 6px 10px;
+    grid-area: rate;
+    padding: 5px 8px;
     background: var(--blue);
     color: var(--paper);
     border: 2px solid var(--ink);
-    font: 800 16px var(--cond);
+    font: 800 15px var(--cond);
     font-variant-numeric: tabular-nums;
     transform: rotate(1.5deg);
     box-shadow: 3px 3px 0 var(--ink);
     white-space: nowrap;
   }
+  .rate.pulse { animation: pulse 0.35s ease-out; }
+  @keyframes pulse { 50% { transform: rotate(1.5deg) scale(1.08); } }
+  .rank-bar { grid-area: bar; display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .rank-bar .bar { flex: 1; height: 8px; border: 2px solid var(--ink); background: var(--paper-2); overflow: hidden; }
+  .rank-bar .bar i { display: block; height: 100%; width: 0; background: repeating-linear-gradient(-45deg, var(--pink) 0 6px, #ff7dbc 6px 12px); transition: width 0.3s; }
+  .rank-bar span { font: 600 11px var(--cond); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
 
-  /* ---------- Scène ---------- */
-  .stage {
+  /* ---------- Jeu ---------- */
+  .game {
     position: relative;
-    flex: 0 0 auto;
-    height: clamp(250px, 42vh, 390px);
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
     touch-action: none;
     cursor: pointer;
-    overflow: hidden;
-    border-bottom: 3px solid var(--ink);
     background: var(--paper);
   }
   #scene { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-  .board-wrap {
-    position: absolute;
-    left: 50%; top: 79%;
-    width: min(58vw, 280px);
-    aspect-ratio: 3.6;
-    max-width: 100%;
-    transform: translate(-50%, -50%);
-    pointer-events: none;
-    z-index: 2;
-  }
-  .board-shadow {
-    position: absolute;
-    left: 8%; right: 8%; top: 40%; height: 42%;
-    border-radius: 50%;
-    background: rgba(20, 20, 20, 0.28);
-    filter: blur(5px);
-  }
-  .lift { position: absolute; inset: 0; perspective: 700px; }
-  .tilt { position: absolute; inset: 0; transform-style: preserve-3d; transform: rotateX(56deg); }
-  .board { position: absolute; inset: 0; transform-style: preserve-3d; }
-  .face {
-    position: absolute;
-    inset: 0;
-    border-radius: 999px;
-    border: 3px solid var(--ink);
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-    overflow: hidden;
-  }
-  /* Grip : évolue avec le niveau « Grip neuf » */
-  .face.top {
-    --bolt: radial-gradient(circle, #8f8a80 0 2.4px, transparent 3px);
-    background:
-      var(--bolt) 21% 30% / 12px 12px no-repeat, var(--bolt) 21% 70% / 12px 12px no-repeat,
-      var(--bolt) 25% 30% / 12px 12px no-repeat, var(--bolt) 25% 70% / 12px 12px no-repeat,
-      var(--bolt) 75% 30% / 12px 12px no-repeat, var(--bolt) 75% 70% / 12px 12px no-repeat,
-      var(--bolt) 79% 30% / 12px 12px no-repeat, var(--bolt) 79% 70% / 12px 12px no-repeat,
-      radial-gradient(circle, rgba(255,255,255,0.1) 0 0.8px, transparent 1.2px) 0 0 / 5px 5px,
-      var(--grip-band, linear-gradient(transparent, transparent)),
-      #1c1b1f;
-  }
-  .face.top.grip-1 { --grip-band: linear-gradient(90deg, transparent 44%, var(--pink) 44% 47%, transparent 47% 53%, var(--pink) 53% 56%, transparent 56%); }
-  .face.top.grip-2 { --grip-band: repeating-conic-gradient(#1c1b1f 0 25%, #f2eee3 0 50%) 50% 50% / 14px 14px; }
-  .face.top.grip-2::before {
-    content: ""; position: absolute; inset: 0;
-    background: linear-gradient(90deg, #1c1b1f 38%, transparent 38% 62%, #1c1b1f 62%);
-  }
-  .face.top.grip-3 { --grip-band: linear-gradient(110deg, transparent 20%, rgba(255,79,163,0.55) 35%, rgba(43,89,255,0.55) 50%, rgba(255,212,0,0.55) 65%, transparent 80%); }
-  .face.top.grip-4 { --grip-band: radial-gradient(circle, #ffd400 0 1.2px, transparent 1.8px) 0 0 / 7px 7px; }
-  .sticker {
-    position: absolute;
-    left: 50%; top: 50%;
-    transform: translate(-50%, -50%) rotate(-8deg);
-    padding: 1px 8px;
-    background: var(--yellow);
-    border: 2px solid var(--ink);
-    color: var(--ink);
-    font: 400 13px var(--display);
-    z-index: 1;
-  }
-  /* Chaussures pro : les pieds du rider apparaissent sur la planche */
-  .foot {
-    position: absolute;
-    top: 18%; height: 64%; width: 13%;
-    border-radius: 40% 40% 45% 45%;
-    border: 2px solid var(--ink);
-    background: var(--shoe, #f2eee3);
-    box-shadow: inset 0 -5px 0 var(--sole, #ff4fa3);
-    z-index: 2;
-  }
-  .foot.l { left: 22%; transform: rotate(-8deg); }
-  .foot.r { right: 22%; transform: rotate(10deg); }
-  .board.shoes-2 { --shoe: #ff4fa3; --sole: #f2eee3; }
-  .board.shoes-3 { --shoe: #ffd400; --sole: #141414; }
-  .board:not(.has-shoes) .foot { display: none; }
-  /* Dessous de la planche : le graphisme change avec le rang */
-  .face.bottom {
-    transform: rotateX(180deg);
-    display: grid;
-    place-items: center;
-    background: var(--pink);
-  }
-  .face.bottom span {
-    font: 400 clamp(13px, 4.6vw, 20px) var(--display);
-    color: var(--paper);
-    text-shadow: 2px 2px 0 var(--ink);
-    position: relative;
-    z-index: 1;
-  }
-  .face.bottom i {
-    position: absolute;
-    top: 16%; bottom: 16%;
-    width: 8%;
-    border-radius: 5px;
-    background: #c9c6bf;
-    border: 2px solid var(--ink);
-  }
-  .face.bottom i:nth-of-type(1) { left: 19%; }
-  .face.bottom i:nth-of-type(2) { right: 19%; }
-  .face.bottom i::before, .face.bottom i::after {
-    content: "";
-    position: absolute;
-    left: -30%; right: -30%;
-    height: 30%;
-    border-radius: 5px;
-    background: var(--wheel, #f2eee3);
-    border: 2px solid var(--ink);
-  }
-  .face.bottom i::before { top: -14%; }
-  .face.bottom i::after { bottom: -14%; }
-  .deck-1 { background: repeating-linear-gradient(-50deg, var(--yellow) 0 12px, var(--ink) 12px 16px) !important; }
-  .deck-2 { background: radial-gradient(circle, var(--pink) 0 2.5px, transparent 3px) 0 0 / 9px 9px, var(--blue) !important; }
-  .deck-3 { background: repeating-conic-gradient(var(--ink) 0 25%, var(--paper) 0 50%) 0 0 / 22px 22px !important; }
-  .deck-4 { background: repeating-conic-gradient(from 0deg at 50% 50%, var(--yellow) 0 10deg, var(--pink) 10deg 20deg) !important; }
-  .deck-5 { background: repeating-radial-gradient(circle at 50% 120%, var(--ink) 0 10px, var(--blue) 10px 20px, var(--pink) 20px 26px) !important; }
-  .deck-6 { background: linear-gradient(100deg, var(--pink), var(--yellow), #7ce8ff, var(--blue), var(--pink)) !important; }
-  .deck-7 { background: linear-gradient(100deg, #9c6b00, #ffe37a 30%, #c99400 55%, #fff1b0 75%, #9c6b00) !important; }
-
   .combo {
     position: absolute;
-    left: 12px; top: 10px;
+    left: 10px; top: 10px;
+    max-width: calc(100% - 150px);
     z-index: 3;
-    padding: 6px 10px 5px;
+    padding: 6px 10px 6px;
     background: var(--ink);
-    color: var(--yellow);
-    font: 400 15px var(--display);
-    transform: rotate(-3deg);
+    color: var(--paper);
+    transform: rotate(-2deg);
     box-shadow: 3px 3px 0 var(--pink);
     pointer-events: none;
   }
-  .combo i {
-    display: block;
-    margin-top: 4px;
-    height: 4px;
-    background: var(--pink);
-    width: 0;
-    transition: width 0.12s linear;
-  }
-  .tap-hint {
+  .combo .names { font: 800 13px var(--cond); text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .combo .score { font: 400 18px var(--display); color: var(--yellow); font-variant-numeric: tabular-nums; }
+  .combo .score em { font-style: normal; color: var(--pink); }
+  .letters {
     position: absolute;
-    left: 50%; bottom: 8px;
-    transform: translateX(-50%);
+    right: 10px; top: 10px;
     z-index: 3;
-    padding: 4px 10px;
-    background: var(--paper);
-    border: 2px solid var(--ink);
-    font: 800 13px var(--cond);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
+    display: flex;
+    gap: 3px;
     pointer-events: none;
-    white-space: nowrap;
-    animation: nudge 1.2s ease-in-out infinite alternate;
   }
-  @keyframes nudge { to { transform: translateX(-50%) translateY(-4px); } }
+  .letters span {
+    width: 22px; height: 24px;
+    display: grid; place-items: center;
+    font: 400 13px var(--display);
+    border: 2px solid var(--ink);
+    background: var(--paper);
+    color: #b9b2a2;
+  }
+  .letters span.got { background: var(--yellow); color: var(--ink); }
   .pop {
     position: absolute;
     z-index: 4;
     pointer-events: none;
     transform: translate(-50%, -50%) rotate(var(--r, -3deg));
-    text-align: center;
     white-space: nowrap;
-    padding: 4px 10px 5px;
+    padding: 3px 9px 4px;
     background: var(--paper);
     border: 2px solid var(--ink);
     box-shadow: 3px 3px 0 var(--ink);
-    animation: rise 0.85s cubic-bezier(.2,.8,.3,1) forwards;
+    font: 400 14px var(--display);
+    animation: rise 0.9s cubic-bezier(.2,.8,.3,1) forwards;
   }
-  .pop b { display: block; font: 400 15px var(--display); color: var(--ink); }
-  .pop span { font: 800 16px var(--cond); color: var(--blue); }
+  .pop.bank { background: var(--yellow); font-size: 20px; animation-duration: 1.3s; }
+  .pop.bail { background: var(--red); color: var(--paper); font-size: 20px; }
+  .pop.gap { background: var(--blue); color: var(--paper); }
   .pop.gold { background: var(--yellow); }
   @keyframes rise {
     0% { opacity: 0; transform: translate(-50%, -30%) rotate(var(--r, -3deg)) scale(0.6); }
     15% { opacity: 1; transform: translate(-50%, -60%) rotate(var(--r, -3deg)) scale(1.08); }
-    100% { opacity: 0; transform: translate(-50%, -170%) rotate(var(--r, -3deg)) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -190%) rotate(var(--r, -3deg)) scale(1); }
   }
-  .golden {
+  .tuto {
     position: absolute;
+    inset: 0;
     z-index: 5;
-    width: 78px; height: 24px;
-    border-radius: 999px;
-    border: 3px solid var(--ink);
-    padding: 0;
-    background: linear-gradient(90deg, #b88a00, #ffe37a 40%, #e0a800);
-    box-shadow: 0 0 0 4px rgba(255,212,0,0.45), 0 0 26px rgba(255,212,0,0.9);
-    cursor: pointer;
-    animation: drift 9s linear forwards, wobble 0.6s ease-in-out infinite alternate;
+    display: grid;
+    place-items: center;
+    padding: 16px;
+    background: rgba(242, 238, 227, 0.55);
+    pointer-events: none;
   }
-  @keyframes drift { from { left: -90px; } to { left: calc(100% + 20px); } }
-  @keyframes wobble { from { transform: rotate(-12deg); } to { transform: rotate(12deg); } }
+  .tuto-card {
+    width: min(100%, 330px);
+    padding: 16px 16px 14px;
+    background: var(--paper);
+    border: 3px solid var(--ink);
+    box-shadow: 6px 6px 0 var(--pink);
+    transform: rotate(-1.5deg);
+    display: grid;
+    gap: 9px;
+  }
+  .tuto-card h2 { margin: 0; font: 400 20px var(--display); }
+  .tuto-card ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 7px; }
+  .tuto-card li { display: grid; grid-template-columns: 74px 1fr; gap: 10px; align-items: center; font-size: 14px; line-height: 1.3; }
+  .tuto-card li b {
+    font: 400 11px var(--display);
+    padding: 4px 6px;
+    background: var(--yellow);
+    border: 2px solid var(--ink);
+    text-align: center;
+  }
+  .tuto-card p { margin: 0; font: 800 13px var(--cond); letter-spacing: 0.1em; text-transform: uppercase; text-align: center; color: var(--blue); }
 
-  /* ---------- Boutique ---------- */
-  .shop {
-    flex: 1 1 auto;
+  /* ---------- Panneau d'améliorations ---------- */
+  .sheet {
+    flex: none;
+    height: 45%;
     min-height: 0;
     display: flex;
     flex-direction: column;
     background: var(--paper-2);
+    border-top: 3px solid var(--ink);
+    transition: height 0.28s cubic-bezier(.2,.8,.3,1);
+    z-index: 4;
   }
+  .sheet.dragging { transition: none; }
+  .grab {
+    flex: none;
+    appearance: none;
+    border: 0;
+    background: none;
+    width: 100%;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    touch-action: none;
+    cursor: grab;
+    color: var(--muted);
+    font: 800 11px var(--cond);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .grab i { width: 46px; height: 5px; border-radius: 3px; background: var(--ink); }
   .tabs {
+    flex: none;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
-    padding: 10px 12px 8px;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 5px;
+    padding: 0 10px 8px;
+    touch-action: none;
   }
   .tab {
     position: relative;
     appearance: none;
     border: 2px solid var(--ink);
     background: var(--paper);
-    padding: 9px 2px 8px;
-    font: 400 12px var(--display);
+    padding: 8px 0 7px;
+    font: 400 10.5px var(--display);
     color: var(--ink);
     cursor: pointer;
     box-shadow: 2px 2px 0 var(--ink);
+    white-space: nowrap;
   }
   .tab[aria-selected="true"] { background: var(--yellow); transform: translate(-1px, -1px) rotate(-1.5deg); box-shadow: 3px 3px 0 var(--ink); }
   .tab .dot {
     position: absolute;
-    top: -6px; right: -5px;
+    top: -7px; right: -5px;
     min-width: 16px; height: 16px;
     padding: 0 4px;
     border-radius: 999px;
@@ -363,7 +271,7 @@
     font: 800 10px/12px var(--cond);
     color: var(--ink);
   }
-  .buy-mode { display: flex; justify-content: flex-end; gap: 6px; padding: 0 14px 6px; }
+  .buy-mode { flex: none; display: flex; justify-content: flex-end; gap: 6px; padding: 0 14px 6px; }
   .buy-mode button {
     appearance: none;
     border: 2px solid var(--ink);
@@ -379,6 +287,7 @@
     min-height: 0;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
     padding: 4px 14px calc(env(safe-area-inset-bottom, 0px) + 18px);
     display: grid;
     align-content: start;
@@ -386,16 +295,16 @@
   }
   .item {
     display: grid;
-    grid-template-columns: 46px 1fr auto;
+    grid-template-columns: 44px 1fr auto;
     align-items: center;
     gap: 12px;
-    padding: 12px;
+    padding: 11px 12px;
     background: var(--paper);
     border: 2px solid var(--ink);
     box-shadow: 4px 4px 0 var(--ink);
   }
   .badge {
-    width: 46px; height: 46px;
+    width: 44px; height: 44px;
     border-radius: 50%;
     border: 2px solid var(--ink);
     display: grid;
@@ -407,8 +316,9 @@
     text-align: center;
     line-height: 1;
   }
+  .badge.arrow { font-size: 22px; }
   .item .info { min-width: 0; display: grid; gap: 4px; }
-  .item .name { font: 800 18px/1.05 var(--cond); text-transform: uppercase; letter-spacing: 0.01em; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+  .item .name { font: 800 18px/1.05 var(--cond); text-transform: uppercase; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
   .item .owned { font: 400 12px var(--display); color: var(--blue); }
   .item .desc { font-size: 13px; color: var(--muted); line-height: 1.3; }
   .item .meter { height: 7px; border: 1.5px solid var(--ink); background: var(--paper-2); }
@@ -419,7 +329,7 @@
   .item.done { box-shadow: none; background: transparent; }
   .buy {
     appearance: none;
-    min-width: 84px;
+    min-width: 82px;
     padding: 8px 10px;
     border: 2px solid var(--ink);
     background: var(--pink);
@@ -432,45 +342,46 @@
   .buy:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
   .buy small { display: block; font: 800 11px var(--cond); letter-spacing: 0.08em; }
   .buy:disabled { background: var(--paper-2); color: #8d877a; box-shadow: none; border-style: dashed; cursor: default; }
-  .buy.got { background: none; border: 0; box-shadow: none; color: var(--blue); font: 400 12px var(--display); border-style: solid; }
+  .buy.got { background: none; border: 0; box-shadow: none; color: var(--blue); font: 400 12px var(--display); }
   button:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
 
   .stats { display: grid; margin: 0; background: var(--paper); border: 2px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); }
-  .stats div { display: flex; justify-content: space-between; gap: 12px; padding: 10px 12px; border-bottom: 1.5px solid var(--paper-2); font-size: 14px; }
+  .stats div { display: flex; justify-content: space-between; gap: 12px; padding: 9px 12px; border-bottom: 1.5px solid var(--paper-2); font-size: 14px; }
   .stats div:last-child { border-bottom: 0; }
   .stats dt { color: var(--muted); }
   .stats dd { margin: 0; font: 800 16px var(--cond); text-align: right; }
-  .ranks { display: grid; gap: 6px; margin: 4px 0 0; padding: 0; list-style: none; }
-  .ranks li { display: flex; justify-content: space-between; gap: 10px; padding: 8px 12px; border: 2px solid var(--ink); background: var(--paper); font: 800 15px var(--cond); text-transform: uppercase; }
+  .section-title { margin: 6px 0 0; font: 400 13px var(--display); }
+  .ranks { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+  .ranks li { display: flex; justify-content: space-between; gap: 10px; padding: 7px 12px; border: 2px solid var(--ink); background: var(--paper); font: 800 15px var(--cond); text-transform: uppercase; }
   .ranks li.now { background: var(--yellow); box-shadow: 3px 3px 0 var(--ink); }
   .ranks li.future { border-style: dashed; color: #9a9486; background: transparent; }
-  .section-title { margin: 8px 0 0; font: 400 13px var(--display); }
+  .controls { display: grid; gap: 6px; margin: 0; padding: 12px; list-style: none; background: var(--paper); border: 2px solid var(--ink); font-size: 14px; }
+  .controls b { font: 400 12px var(--display); }
   .danger {
-    margin-top: 10px;
     appearance: none;
-    border: 2px solid #b3261e;
+    border: 2px solid var(--red);
     background: none;
-    color: #b3261e;
+    color: var(--red);
     padding: 11px;
     font: 800 15px var(--cond);
     text-transform: uppercase;
     letter-spacing: 0.06em;
     cursor: pointer;
   }
-  .confirm { display: grid; gap: 8px; padding: 14px; border: 2px solid #b3261e; background: #fde3dc; font-size: 14px; }
+  .confirm { display: grid; gap: 8px; padding: 14px; border: 2px solid var(--red); background: #fde3dc; font-size: 14px; }
   .confirm .row { display: flex; gap: 8px; }
   .confirm button { flex: 1; appearance: none; border: 2px solid var(--ink); padding: 10px; font: 800 15px var(--cond); text-transform: uppercase; cursor: pointer; }
-  .confirm .yes { background: #b3261e; color: #fff; }
+  .confirm .yes { background: var(--red); color: #fff; }
   .confirm .no { background: var(--paper); color: var(--ink); }
 
   .toast {
     position: fixed;
     left: 50%;
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+    top: calc(env(safe-area-inset-top, 0px) + 70px);
     transform: translateX(-50%) rotate(-1deg);
     z-index: 10;
     width: min(92vw, 420px);
-    padding: 12px 16px;
+    padding: 11px 16px;
     background: var(--ink);
     color: var(--paper);
     border: 2px solid var(--ink);
@@ -478,9 +389,9 @@
     font-size: 15px;
     line-height: 1.35;
     text-align: center;
+    pointer-events: none;
   }
   .toast b { color: var(--yellow); font-weight: 700; }
-
   .rankup {
     position: fixed;
     inset: 0;
@@ -515,55 +426,46 @@
     font: 400 14px var(--display);
     cursor: pointer;
   }
-
   @media (prefers-reduced-motion: reduce) {
     .pop { animation-duration: 0.01s; }
-    .golden { animation: drift 9s linear forwards; }
-    .tap-hint { animation: none; }
     .rankup-card { animation: none; transform: rotate(-3deg); }
+    .sheet { transition: none; }
   }
 </style>
 <!-- ARTIFACT-HEAD-END -->
 </head>
 <body>
-<div class="app">
-  <header class="top">
-    <div class="rank-row">
-      <div class="rank-chip" id="rankName">Débutant</div>
-      <div class="rank-progress">
-        <div class="bar"><i id="rankBar"></i></div>
-        <span id="rankNext">Prochain rang : Local du spot</span>
-      </div>
-    </div>
-    <div class="count-row">
-      <div class="count">
-        <small>Points de style</small>
-        <strong id="style">0</strong>
-      </div>
-      <div class="rate"><span id="rate">0</span>/s</div>
-    </div>
+<div class="app" id="app">
+  <header class="top" id="top">
+    <div class="rank-chip" id="rankName">Débutant</div>
+    <div class="count"><strong id="style">0</strong><small>Points de style</small></div>
+    <div class="rate" id="ratePill"><span id="rate">+0</span>/s</div>
+    <div class="rank-bar"><div class="bar"><i id="rankBar"></i></div><span id="rankNext">Local du spot</span></div>
   </header>
 
-  <section class="stage" id="stage" aria-label="Tape sur la planche pour faire une figure">
+  <main class="game" id="game" aria-label="Zone de ride : tape pour sauter, glisse pour faire une figure">
     <canvas id="scene"></canvas>
-    <div class="combo" id="comboBox" hidden><span id="comboText">Combo ×1,00</span><i id="comboFill"></i></div>
-    <div class="board-wrap">
-      <div class="board-shadow" id="shadow"></div>
-      <div class="lift" id="lift">
-        <div class="tilt">
-          <div class="board" id="board">
-            <div class="face top" id="grip"><span class="sticker">N</span><span class="foot l"></span><span class="foot r"></span></div>
-            <div class="face bottom" id="deck"><span>NEUTRON</span><i></i><i></i></div>
-          </div>
-        </div>
+    <div class="combo" id="combo" hidden><div class="names" id="comboNames"></div><div class="score" id="comboScore"></div></div>
+    <div class="letters" id="letters"><span>S</span><span>K</span><span>A</span><span>T</span><span>E</span></div>
+    <div class="tuto" id="tuto" hidden>
+      <div class="tuto-card">
+        <h2>Ride le spot</h2>
+        <ul>
+          <li><b>Tape</b><span>Ollie. Saute par-dessus, sur les barres et les ledges.</span></li>
+          <li><b>Glisse</b><span>En l'air, glisse dans une direction pour une figure apprise.</span></li>
+          <li><b>Barres</b><span>Retombe dessus pour grinder.</span></li>
+          <li><b>Combo</b><span>Enchaîne sans tomber, puis roule au sol pour encaisser.</span></li>
+        </ul>
+        <p>Tape pour commencer</p>
       </div>
     </div>
-    <div class="tap-hint" id="hint">Tape sur la planche</div>
-  </section>
+  </main>
 
-  <section class="shop">
-    <div class="tabs" role="tablist">
+  <section class="sheet" id="sheet">
+    <button class="grab" id="grab" type="button" aria-label="Agrandir ou réduire les améliorations"><i></i><span id="grabLabel">Améliorations</span></button>
+    <div class="tabs" role="tablist" id="tabs">
       <button class="tab" role="tab" type="button" data-tab="tricks" aria-selected="true">Figures<span class="dot" hidden></span></button>
+      <button class="tab" role="tab" type="button" data-tab="park" aria-selected="false">Park<span class="dot" hidden></span></button>
       <button class="tab" role="tab" type="button" data-tab="gear" aria-selected="false">Matos<span class="dot" hidden></span></button>
       <button class="tab" role="tab" type="button" data-tab="crew" aria-selected="false">Crew<span class="dot" hidden></span></button>
       <button class="tab" role="tab" type="button" data-tab="stats" aria-selected="false">Profil</button>
@@ -590,67 +492,76 @@
 (() => {
   "use strict";
 
-  const C = { paper: "#f2eee3", paper2: "#e8e2d3", ink: "#141414", pink: "#ff4fa3", blue: "#2b59ff", yellow: "#ffd400", concrete: "#cfc9bc", concrete2: "#b6af9f" };
+  const C = { paper: "#f2eee3", paper2: "#e8e2d3", ink: "#141414", pink: "#ff4fa3", blue: "#2b59ff", yellow: "#ffd400", red: "#e5322d", concrete: "#cfc9bc", concrete2: "#b6af9f", metal: "#9a988f" };
+  const ARROWS = { R: "→", DR: "↘", D: "↓", DL: "↙", L: "←", UL: "↖", U: "↑", UR: "↗" };
+  const SECTORS = ["R", "DR", "D", "DL", "L", "UL", "U", "UR"];
 
   // ================= Données du jeu =================
+  // Figures : chacune se déclenche en glissant dans une direction pendant un saut.
   const TRICKS = [
-    { id: "ollie",      name: "Ollie",        tag: "OL",  cost: 0,   mult: 1, desc: "La base. On décolle la planche du sol." },
-    { id: "kickflip",   name: "Kickflip",     tag: "KF",  cost: 50,  mult: 2, desc: "La planche tourne sur son grand axe." },
-    { id: "heelflip",   name: "Heelflip",     tag: "HF",  cost: 600, mult: 2, desc: "Le kickflip à l'envers, avec le talon." },
-    { id: "shoveit",    name: "Pop Shove-it", tag: "PS",  cost: 6e3, mult: 2, desc: "La planche pivote à 180° sous tes pieds." },
-    { id: "treflip",    name: "360 Flip",     tag: "360", cost: 7e4, mult: 3, desc: "Kickflip + shove-it 360. Le tre flip." },
-    { id: "hardflip",   name: "Hardflip",     tag: "HD",  cost: 8e5, mult: 3, desc: "Un flip vertical entre les jambes." },
-    { id: "impossible", name: "Impossible",   tag: "IMP", cost: 1e7, mult: 4, desc: "La planche s'enroule autour du pied." },
-    { id: "nine",       name: "900",          tag: "900", cost: 2e8, mult: 5, desc: "Deux tours et demi en l'air. Légendaire." },
+    { id: "kickflip",   name: "Kickflip",     dir: "L",  dur: 0.42, pts: 30,   cost: 150,   anim: "kick",  desc: "La planche tourne sur son grand axe." },
+    { id: "heelflip",   name: "Heelflip",     dir: "R",  dur: 0.42, pts: 30,   cost: 500,   anim: "heel",  desc: "Le kickflip à l'envers, avec le talon." },
+    { id: "shoveit",    name: "Pop Shove-it", dir: "D",  dur: 0.4,  pts: 40,   cost: 1500,  anim: "shove", desc: "La planche pivote à 180° sous tes pieds." },
+    { id: "indy",       name: "Indy Grab",    dir: "U",  dur: 0.5,  pts: 50,   cost: 4000,  anim: "grab",  desc: "Tu attrapes la planche en plein vol." },
+    { id: "treflip",    name: "360 Flip",     dir: "DL", dur: 0.55, pts: 100,  cost: 1.5e4, anim: "tre",   desc: "Kickflip + shove-it 360. Le tre flip." },
+    { id: "hardflip",   name: "Hardflip",     dir: "DR", dur: 0.55, pts: 150,  cost: 6e4,   anim: "hard",  desc: "Un flip vertical entre les jambes." },
+    { id: "impossible", name: "Impossible",   dir: "UL", dur: 0.6,  pts: 250,  cost: 2.5e5, anim: "imp",   desc: "La planche s'enroule autour du pied." },
+    { id: "nine",       name: "900",          dir: "UR", dur: 0.95, pts: 1000, cost: 2e6,   anim: "nine",  desc: "Deux tours et demi. Il faut une grosse rampe." },
   ];
+  // Park : chaque module acheté apparaît sur le parcours.
+  const PARK = [
+    { id: "kicker",    name: "Kicker",            tag: "KCK", cost: 100,   desc: "Un tremplin pour prendre de l'air." },
+    { id: "ledge",     name: "Ledge",             tag: "LDG", cost: 350,   desc: "Un muret à grinder. Saute dessus." },
+    { id: "funbox",    name: "Funbox avec rail",  tag: "FBX", cost: 1200,  desc: "Une plateforme avec une barre sur le dessus." },
+    { id: "handrail",  name: "Escalier et rampe", tag: "HR",  cost: 5000,  desc: "Un set de marches avec une rampe à grinder." },
+    { id: "gap",       name: "Gap",               tag: "GAP", cost: 2e4,   desc: "Un trou à franchir. Bonus « Gap » si tu passes." },
+    { id: "bigkicker", name: "Grosse rampe",      tag: "BIG", cost: 8e4,   desc: "Beaucoup plus d'air pour les grosses figures." },
+    { id: "mega",      name: "Méga rampe",        tag: "MEG", cost: 6e5,   desc: "La rampe géante et son méga gap. Parfait pour le 900." },
+  ];
+  const PARK_BONUS = 0.1;
   const GEAR = [
-    { id: "grip",     name: "Grip neuf",         tag: "GRP", base: 10,   growth: 1.55, max: 200, tiers: [5, 15, 40, 100],
-      desc: (l) => `+1 point de base par tape (actuel : ${1 + l}). Nouveau grip aux niveaux 5, 15, 40 et 100.` },
-    { id: "bearings", name: "Roulements ABEC 9", tag: "ABC", base: 250,  growth: 4,    max: 6, tiers: [1, 3, 5],
-      desc: (l) => `Combo max ×${fmtMult(comboCap(l + 1))} au prochain niveau. Les roues changent de couleur.` },
-    { id: "wax",      name: "Wax pour curb",     tag: "WAX", base: 3000, growth: 3,    max: 10, tiers: [1, 4, 8],
-      desc: (l) => `Chaque tape rapporte aussi ${(l + 1) * 2} % de ta production par seconde. Le curb brille.` },
-    { id: "shoes",    name: "Chaussures pro",    tag: "SHO", base: 5e4,  growth: 6,    max: 8, tiers: [1, 4, 7],
-      desc: (l) => `+25 % de production du crew (actuel : +${l * 25} %). Tes pieds apparaissent sur la planche.` },
+    { id: "grip",     name: "Grip neuf",      tag: "GRP", base: 40,  growth: 1.6,  max: 30, desc: (l) => `+15 % de points sur toutes tes figures (actuel : +${l * 15} %).` },
+    { id: "pop",      name: "Planche pro",    tag: "POP", base: 120, growth: 1.9,  max: 10, desc: (l) => `Ollies plus hauts : +${(l + 1) * 5} % de détente au prochain niveau.` },
+    { id: "bearings", name: "Roulements",     tag: "ABC", base: 200, growth: 2,    max: 8,  desc: (l) => `Tu roules plus vite : +${(l + 1) * 6} % de vitesse au prochain niveau.` },
+    { id: "wax",      name: "Wax",            tag: "WAX", base: 500, growth: 1.9,  max: 10, desc: (l) => `Grinds +30 % par niveau (actuel : +${l * 30} %).` },
+    { id: "shoes",    name: "Chaussures pro", tag: "SHO", base: 800, growth: 2.4,  max: 6,  desc: (l) => `Réceptions plus tolérantes : figure à ${Math.round(landReq(l + 1) * 100)} % suffit au prochain niveau.` },
   ];
   const CREW = [
-    { id: "pote",   name: "Pote qui filme",          tag: "CAM", color: C.yellow, base: 15,    rate: 0.3,   desc: "Il filme tes lignes depuis le bord du spot." },
-    { id: "park",   name: "Abonnement au skatepark", tag: "PRK", color: C.blue,   base: 120,   rate: 2,     desc: "Des modules apparaissent dans ton spot." },
-    { id: "insta",  name: "Compte Insta",            tag: "IG",  color: C.pink,   base: 1300,  rate: 12,    desc: "Tes clips tournent et les likes pleuvent." },
-    { id: "shop",   name: "Sponsor du skateshop",    tag: "SHP", color: C.yellow, base: 1.4e4, rate: 70,    desc: "Le shop du quartier ouvre derrière le spot." },
-    { id: "video",  name: "Part vidéo",              tag: "VID", color: C.blue,   base: 1.6e5, rate: 400,   desc: "Une équipe tournage installe ses caméras." },
-    { id: "team",   name: "Team pro",                tag: "TM",  color: C.pink,   base: 2e6,   rate: 2500,  desc: "Les pros de ta team roulent avec toi." },
-    { id: "brand",  name: "Ta propre marque",        tag: "BRD", color: C.yellow, base: 3e7,   rate: 1.5e4, desc: "Ton logo s'affiche en géant au-dessus du spot." },
-    { id: "xgames", name: "Contest international",   tag: "WC",  color: C.blue,   base: 5e8,   rate: 1e5,   desc: "Gradins, foule et confettis : c'est la finale." },
+    { id: "pote",   name: "Pote qui filme",        tag: "CAM", color: C.yellow, base: 60,    rate: 1,     desc: "Il filme au bord des modules." },
+    { id: "insta",  name: "Compte Insta",          tag: "IG",  color: C.pink,   base: 700,   rate: 8,     desc: "Tes clips tournent et les likes pleuvent." },
+    { id: "shop",   name: "Sponsor du skateshop",  tag: "SHP", color: C.yellow, base: 8000,  rate: 50,    desc: "Le shop du quartier ouvre au bord du park." },
+    { id: "video",  name: "Part vidéo",            tag: "VID", color: C.blue,   base: 9e4,   rate: 300,   desc: "Un filmeur te suit en board pendant tes lignes." },
+    { id: "team",   name: "Team pro",              tag: "TM",  color: C.pink,   base: 1e6,   rate: 2000,  desc: "Les pros de ta team roulent au fond du park." },
+    { id: "brand",  name: "Ta propre marque",      tag: "BRD", color: C.yellow, base: 1.5e7, rate: 1.2e4, desc: "Ton logo en géant au-dessus du park." },
+    { id: "xgames", name: "Contest international", tag: "WC",  color: C.blue,   base: 2.5e8, rate: 8e4,   desc: "Gradins, foule et confettis : c'est la finale." },
   ];
   const CREW_GROWTH = 1.15;
   const MILESTONES = [10, 25, 50, 100, 200];
   const RANKS = [
     { name: "Débutant",      at: 0,    sun: C.pink },
-    { name: "Local du spot", at: 300,  sun: C.yellow },
-    { name: "Amateur",       at: 5e3,  sun: C.blue },
-    { name: "Flow",          at: 1e5,  sun: C.pink },
-    { name: "Sponsorisé",    at: 2e6,  sun: C.yellow },
-    { name: "Pro",           at: 5e7,  sun: C.blue },
+    { name: "Local du spot", at: 500,  sun: C.yellow },
+    { name: "Amateur",       at: 1e4,  sun: C.blue },
+    { name: "Flow",          at: 2e5,  sun: C.pink },
+    { name: "Sponsorisé",    at: 4e6,  sun: C.yellow },
+    { name: "Pro",           at: 8e7,  sun: C.blue },
     { name: "Légende",       at: 2e9,  sun: C.pink },
     { name: "Icône",         at: 1e11, sun: C.yellow },
   ];
   const RANK_BONUS = 0.15;
+  const DECK_COLORS = [C.pink, C.yellow, C.blue, C.pink, C.yellow, C.blue, C.pink, "#e0a800"];
 
   // ================= État et sauvegarde =================
-  const SAVE_KEY = "neutron-skate.save.v1";
+  const SAVE_KEY = "neutron-skate.save.v2";
   const fresh = () => ({
-    style: 0, total: 0, taps: 0, bestCombo: 0, goldens: 0, rank: 0,
-    tricks: { ollie: true }, gear: {}, crew: {},
+    style: 0, total: 0, rank: 0, tutorial: false,
+    tricks: {}, park: {}, gear: {}, crew: {}, letters: 0,
+    stats: { combos: 0, bestCombo: 0, bestMult: 0, bails: 0, tricks: 0, gaps: 0, skate: 0, golds: 0 },
     started: Date.now(), lastSave: Date.now(),
   });
   let S = fresh();
   try {
     const raw = localStorage.getItem(SAVE_KEY);
-    if (raw) {
-      S = Object.assign(fresh(), JSON.parse(raw));
-      if (S.rank === undefined) S.rank = 0;
-    }
+    if (raw) { const d = JSON.parse(raw); S = Object.assign(fresh(), d); S.stats = Object.assign(fresh().stats, d.stats || {}); }
   } catch { /* pas de sauvegarde disponible */ }
   const save = () => {
     S.lastSave = Date.now();
@@ -660,30 +571,25 @@
   // ================= Calculs =================
   const lvl = (id) => S.gear[id] || 0;
   const owned = (id) => S.crew[id] || 0;
-  const comboCap = (l) => 1.5 + l * 0.5;
+  const parkCount = () => PARK.filter((p) => S.park[p.id]).length;
   const rankIndex = (total) => RANKS.reduce((idx, r, i) => (total >= r.at ? i : idx), 0);
   const rankMult = () => 1 + S.rank * RANK_BONUS;
-  const trickMult = () => TRICKS.reduce((m, t) => (S.tricks[t.id] ? m * t.mult : m), 1);
+  const rideMult = () => (1 + lvl("grip") * 0.15) * rankMult() * (1 + parkCount() * PARK_BONUS);
+  const grindMult = () => 1 + lvl("wax") * 0.3;
+  function landReq(l = lvl("shoes")) { return Math.max(0.55, 0.9 - l * 0.06); }
   const milestoneMult = (n) => 2 ** MILESTONES.filter((m) => n >= m).length;
   const nextMilestone = (n) => MILESTONES.find((m) => n < m);
-  const crewUnitRate = (c, n = owned(c.id)) => c.rate * milestoneMult(n) * (1 + lvl("shoes") * 0.25) * rankMult();
+  const crewUnitRate = (c, n = owned(c.id)) => c.rate * milestoneMult(n) * rankMult();
   const crewRate = (c) => crewUnitRate(c) * owned(c.id);
-  const perSecond = () => CREW.reduce((sum, c) => sum + crewRate(c), 0);
-  const tapBase = () => ((1 + lvl("grip")) * trickMult()) * rankMult() + perSecond() * lvl("wax") * 0.02;
-  const tierOf = (value, tiers) => tiers.filter((t) => value >= t).length;
-  const crewTier = (n) => (n <= 0 ? 0 : n < 10 ? 1 : n < 25 ? 2 : n < 50 ? 3 : 4);
-
+  const perSecond = () => CREW.reduce((s, c) => s + crewRate(c), 0);
+  const tierOf = (v, tiers) => tiers.filter((t) => v >= t).length;
   const gearCost = (g) => Math.ceil(g.base * g.growth ** lvl(g.id));
-  const crewCost = (c, n) => {
-    const first = c.base * CREW_GROWTH ** owned(c.id);
-    return Math.ceil(first * (CREW_GROWTH ** n - 1) / (CREW_GROWTH - 1));
-  };
+  const crewCost = (c, n) => Math.ceil(c.base * CREW_GROWTH ** owned(c.id) * (CREW_GROWTH ** n - 1) / (CREW_GROWTH - 1));
   const crewMaxAffordable = (c) => {
     const first = c.base * CREW_GROWTH ** owned(c.id);
     return Math.max(0, Math.floor(Math.log(S.style * (CREW_GROWTH - 1) / first + 1) / Math.log(CREW_GROWTH)));
   };
 
-  // ================= Formatage =================
   const UNITS = ["", " k", " M", " Md", " Bn", " Bd", " Tn", " Td", " Qa", " Qi"];
   function fmt(n) {
     if (!isFinite(n)) return "∞";
@@ -693,202 +599,477 @@
     }
     const tier = Math.min(Math.floor(Math.log10(n) / 3), UNITS.length - 1);
     const v = n / 1000 ** tier;
-    const digits = v < 10 ? 2 : v < 100 ? 1 : 0;
-    return (Math.floor(v * 10 ** digits) / 10 ** digits).toFixed(digits).replace(".", ",") + UNITS[tier];
+    const d = v < 10 ? 2 : v < 100 ? 1 : 0;
+    return (Math.floor(v * 10 ** d) / 10 ** d).toFixed(d).replace(".", ",") + UNITS[tier];
   }
-  const fmtMult = (x) => x.toFixed(2).replace(".", ",");
   function fmtDuration(ms) {
     const s = Math.floor(ms / 1000), h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
     return h ? `${h} h ${String(m).padStart(2, "0")}` : m ? `${m} min ${String(s % 60).padStart(2, "0")}` : `${s} s`;
   }
   const rand = (a, b) => a + Math.random() * (b - a);
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 
-  // ================= Éléments =================
   const $ = (id) => document.getElementById(id);
   const el = {
-    style: $("style"), rate: $("rate"), stage: $("stage"), board: $("board"), lift: $("lift"), shadow: $("shadow"),
-    grip: $("grip"), deck: $("deck"), hint: $("hint"), comboBox: $("comboBox"), comboText: $("comboText"), comboFill: $("comboFill"),
-    list: $("list"), buyMode: $("buyMode"), toast: $("toast"),
+    app: $("app"), top: $("top"), game: $("game"), sheet: $("sheet"), grab: $("grab"), grabLabel: $("grabLabel"), tabs: $("tabs"),
+    style: $("style"), rate: $("rate"), ratePill: $("ratePill"), list: $("list"), buyMode: $("buyMode"), toast: $("toast"),
     rankName: $("rankName"), rankBar: $("rankBar"), rankNext: $("rankNext"),
     rankup: $("rankup"), rankupName: $("rankupName"), rankupText: $("rankupText"),
+    combo: $("combo"), comboNames: $("comboNames"), comboScore: $("comboScore"), letters: $("letters"), tuto: $("tuto"),
   };
   const gain = (n) => { S.style += n; S.total += n; };
 
-  // ================= Scène du spot (canvas) =================
-  const cv = $("scene"), cx = cv.getContext("2d");
-  const layer = document.createElement("canvas"), lx = layer.getContext("2d");
-  let W = 0, H = 0, DPR = 1, G = 0, sceneKey = "";
-  const fx = { floats: [], sparks: [], confetti: [], hearts: [], flashes: [] };
+  // ================= Monde : parcours généré au fil du ride =================
+  const GRAV = 1800, OLLIE_V = 590, BASE_SPEED = 250;
+  let GP, launches, rails, gaps, decos, items, genX, worldReady = false;
 
-  function resizeScene() {
-    const r = el.stage.getBoundingClientRect();
-    W = Math.round(r.width); H = Math.round(r.height);
-    DPR = Math.min(window.devicePixelRatio || 1, 2.5);
-    for (const c of [cv, layer]) { c.width = Math.round(W * DPR); c.height = Math.round(H * DPR); }
-    G = Math.round(H * 0.6);
-    sceneKey = "";
+  function resetWorld() {
+    GP = [{ x: -3000, y: 0 }, { x: 0, y: 0 }];
+    launches = []; rails = []; gaps = []; decos = []; items = [];
+    genX = 0;
+    flat(700);
+  }
+  function pt(x, y) { GP.push({ x, y }); genX = x; }
+  function flat(len) { pt(genX + len, 0); }
+  function groundAt(x) {
+    if (x <= GP[0].x) return GP[0].y;
+    let lo = 0, hi = GP.length - 1;
+    if (x >= GP[hi].x) return GP[hi].y;
+    while (hi - lo > 1) { const m = (lo + hi) >> 1; if (GP[m].x <= x) lo = m; else hi = m; }
+    const a = GP[lo], b = GP[hi];
+    return b.x === a.x ? b.y : a.y + (b.y - a.y) * (x - a.x) / (b.x - a.x);
+  }
+  const railY = (r, x) => r.y0 + (r.y1 - r.y0) * (x - r.x0) / (r.x1 - r.x0);
+
+  function maybeFilmer(x) {
+    if (owned("pote") && Math.random() < Math.min(0.85, 0.25 + owned("pote") * 0.03)) {
+      decos.push({ t: "filmer", x, color: [C.yellow, C.pink, C.blue][Math.floor(rand(0, 3))] });
+    }
+  }
+  function maybeCollectible(x, y) {
+    const r = Math.random();
+    if (r < 0.5) items.push({ kind: "letter", x, y, idx: S.letters });
+    else if (r < 0.57) items.push({ kind: "gold", x, y });
   }
 
-  const sceneState = () => ({
-    rank: S.rank,
-    park: crewTier(owned("park")), shop: crewTier(owned("shop")), video: crewTier(owned("video")),
-    brand: crewTier(owned("brand")), xgames: crewTier(owned("xgames")),
-    wax: tierOf(lvl("wax"), GEAR[2].tiers),
+  function kicker(h, len, v, label) {
+    const x0 = genX;
+    pt(x0 + len, -h);
+    launches.push({ x: x0 + len, v });
+    decos.push({ t: "kicker", x0, x1: x0 + len, h, label });
+    pt(x0 + len + 0.5, 0);
+    return x0 + len;
+  }
+  function pit(lip, width, depth, name, pts) {
+    pt(lip + 0.6, depth);
+    pt(lip + width - 70, depth);
+    pt(lip + width, 0);
+    gaps.push({ x0: lip, x1: lip + width, name, pts });
+    decos.push({ t: "pit", x0: lip, x1: lip + width, depth });
+  }
+
+  function generate() {
+    const speedF = speed() / BASE_SPEED;
+    flat(rand(260, 440) * speedF);
+    const avail = PARK.filter((p) => S.park[p.id]).map((p) => p.id);
+    if (!avail.length) {
+      // Rue sans module : on sème des lettres à hauteur d'ollie
+      if (Math.random() < 0.6) maybeCollectible(genX + rand(40, 160), -rand(55, 85));
+      return;
+    }
+    const type = avail[Math.floor(Math.random() * avail.length)];
+    maybeFilmer(genX - 60);
+    switch (type) {
+      case "kicker": {
+        const lip = kicker(38, 80, 760);
+        maybeCollectible(lip + speed() * 0.42, -38 - 140);
+        flat(260);
+        break;
+      }
+      case "ledge": {
+        const x0 = genX + 20;
+        decos.push({ t: "ledge", x0, x1: x0 + 250, h: 30 });
+        rails.push({ x0: x0 + 4, x1: x0 + 246, y0: -30, y1: -30, kind: "ledge" });
+        flat(290);
+        break;
+      }
+      case "funbox": {
+        const x0 = genX;
+        pt(x0 + 70, -44); pt(x0 + 290, -44); pt(x0 + 360, 0);
+        rails.push({ x0: x0 + 100, x1: x0 + 260, y0: -44 - 28, y1: -44 - 28, kind: "rail" });
+        decos.push({ t: "funbox", x0, x1: x0 + 360, h: 44 });
+        break;
+      }
+      case "handrail": {
+        const x0 = genX;
+        pt(x0 + 90, -72); pt(x0 + 170, -72);
+        launches.push({ x: x0 + 170, v: 240 });
+        pt(x0 + 340, 0);
+        decos.push({ t: "stairs", x0: x0 + 170, x1: x0 + 340, h: 72, b0: x0 });
+        rails.push({ x0: x0 + 160, x1: x0 + 350, y0: -72 - 32, y1: -30, kind: "rail" });
+        break;
+      }
+      case "gap": {
+        const lip = kicker(40, 80, 830);
+        pit(lip, 220, 60, "Gap", 150);
+        maybeCollectible(lip + speed() * 0.45, -40 - 150);
+        flat(160);
+        break;
+      }
+      case "bigkicker": {
+        const lip = kicker(85, 150, 1060, "BIG");
+        maybeCollectible(lip + speed() * 0.6, -85 - 260);
+        flat(460);
+        break;
+      }
+      case "mega": {
+        const lip = kicker(140, 240, 1380, "MEGA");
+        pit(lip, 380, 80, "Méga gap", 2000);
+        maybeCollectible(lip + speed() * 0.8, -140 - 420);
+        flat(300);
+        break;
+      }
+    }
+  }
+  function ensureWorld(toX) {
+    while (genX < toX) generate();
+    const cut = camX - 900;
+    while (GP.length > 3 && GP[1].x < cut) GP.shift();
+    const keep = (o) => (o.x1 ?? o.x) > cut;
+    launches = launches.filter(keep); rails = rails.filter(keep); gaps = gaps.filter(keep);
+    decos = decos.filter(keep); items = items.filter(keep);
+  }
+
+  // ================= Rider =================
+  const speed = () => BASE_SPEED * (1 + lvl("bearings") * 0.06);
+  const P = { x: 120, y: 0, vy: 0, mode: "ground", trick: null, trickT: 0, queued: null, airT: 0, airStartX: 0, airTricks: 0, launched: false, rail: null, grindT: 0, grindPts: 0, bailT: 0, crouch: 0, spd: BASE_SPEED };
+  const K = { items: [], pending: 0, groundT: 0 };
+  let camX = 0, camY = -300;
+
+  function addItem(name, pts) {
+    K.items.push(name);
+    K.pending += pts * rideMult();
+    K.groundT = 0;
+    updateComboHud();
+  }
+  function bankCombo() {
+    if (!K.items.length) return;
+    const mult = K.items.length;
+    const total = K.pending * mult;
+    gain(total);
+    S.stats.combos += 1;
+    S.stats.bestCombo = Math.max(S.stats.bestCombo, total);
+    S.stats.bestMult = Math.max(S.stats.bestMult, mult);
+    popAtRider(`+${fmt(total)}`, "bank");
+    if (mult >= 4) confettiBurst(P.x, P.y - 40, 10 + mult * 3, 300);
+    K.items = []; K.pending = 0;
+    updateComboHud();
+  }
+  function bail() {
+    P.mode = "bail"; P.bailT = 1.1; P.trick = null; P.queued = null; P.rail = null;
+    S.stats.bails += 1;
+    if (K.items.length) popAtRider("BAIL !", "bail");
+    K.items = []; K.pending = 0;
+    updateComboHud();
+    shake(8);
+    try { navigator.vibrate?.([30, 30, 50]); } catch { /* non supporté */ }
+  }
+
+  function ollie() {
+    if (P.mode === "ground" || P.mode === "grind") {
+      if (P.mode === "grind") endGrind();
+      P.mode = "air";
+      P.vy = -OLLIE_V * (1 + lvl("pop") * 0.05);
+      P.airT = 0; P.airTricks = 0; P.launched = false; P.airStartX = P.x;
+      P.crouch = 0;
+      try { navigator.vibrate?.(6); } catch { /* non supporté */ }
+      return true;
+    }
+    return false;
+  }
+  function trickFor(sector, dx, dy) {
+    const learned = (dir) => TRICKS.find((t) => t.dir === dir && S.tricks[t.id]);
+    let t = learned(sector);
+    if (!t && sector.length === 2) {
+      const order = Math.abs(dx) > Math.abs(dy) ? [sector[1], sector[0]] : [sector[0], sector[1]];
+      t = learned(order[0]) || learned(order[1]);
+    }
+    return t;
+  }
+  function swipe(dx, dy) {
+    const sector = SECTORS[((Math.round(Math.atan2(dy, dx) / (Math.PI / 4)) % 8) + 8) % 8];
+    const t = trickFor(sector, dx, dy);
+    if (!t) {
+      if (!Object.keys(S.tricks).length) hintOnce("Achète ta première figure dans l'onglet Figures.");
+      else hintOnce(`${ARROWS[sector]} : aucune figure apprise dans cette direction.`);
+      if (P.mode !== "air") ollie();
+      return;
+    }
+    if (P.mode === "ground" || P.mode === "grind") ollie();
+    if (P.mode !== "air") return;
+    if (P.trick) { P.queued = t; return; }
+    startTrick(t);
+  }
+  function startTrick(t) { P.trick = t; P.trickT = 0; }
+
+  function endGrind() {
+    const r = P.rail;
+    if (!r) return;
+    addItem(r.kind === "ledge" ? "5-0 Grind" : "50-50", P.grindPts);
+    P.rail = null;
+  }
+
+  function land(gy) {
+    if (P.trick && P.trickT / P.trick.dur < landReq()) { P.y = gy; bail(); return; }
+    if (P.trick) completeTrick();
+    P.mode = "ground"; P.y = gy; P.vy = 0; P.crouch = 1;
+    if (P.airTricks === 0) {
+      // Un saut sans figure rapporte ses points tout de suite et clôt le combo en cours
+      if (K.items.length) bankCombo();
+      else {
+        const v = (10 + P.airT * 20) * rideMult();
+        gain(v);
+        popAtRider(`${P.launched ? "Air" : "Ollie"} +${fmt(v)}`, "");
+      }
+    } else if (P.airT > 0.9) addItem("Big air", Math.round(P.airT * 40));
+    dust(P.x, gy);
+    K.groundT = 0;
+  }
+  function completeTrick() {
+    const t = P.trick;
+    P.trick = null;
+    P.airTricks += 1;
+    S.stats.tricks += 1;
+    addItem(t.name, t.pts);
+    popAtRider(t.name, "");
+  }
+
+  function step(dt) {
+    const v = speed();
+    P.spd += (v - P.spd) * Math.min(1, dt * 2);
+    if (P.mode === "bail") {
+      P.bailT -= dt;
+      P.x += P.spd * 0.25 * dt;
+      P.y = groundAt(P.x);
+      if (P.bailT <= 0) { P.mode = "ground"; P.spd = v * 0.4; }
+      return;
+    }
+    const nx = P.x + P.spd * dt;
+    if (P.mode === "ground") {
+      for (const L of launches) {
+        if (P.x < L.x && nx >= L.x) {
+          P.mode = "air"; P.vy = -L.v; P.y = groundAt(L.x - 0.1);
+          P.airT = 0; P.airTricks = 0; P.launched = true; P.airStartX = P.x;
+          break;
+        }
+      }
+      P.x = nx;
+      if (P.mode === "ground") {
+        const gy = groundAt(P.x);
+        if (gy > P.y + 8) { P.mode = "air"; P.vy = 0; P.airT = 0; P.airTricks = 0; P.launched = true; P.airStartX = P.x; }
+        else P.y = gy;
+        P.crouch = Math.max(0, P.crouch - dt * 3);
+        K.groundT += dt;
+        if (K.items.length && K.groundT > 0.45) bankCombo();
+      }
+    } else if (P.mode === "air") {
+      const prevY = P.y;
+      P.x = nx;
+      P.vy += GRAV * dt;
+      P.y += P.vy * dt;
+      P.airT += dt;
+      if (P.trick) {
+        P.trickT += dt;
+        if (P.trickT >= P.trick.dur) { completeTrick(); if (P.queued) { startTrick(P.queued); P.queued = null; } }
+      }
+      for (const g of gaps) {
+        if (!g.done && P.airStartX <= g.x0 && P.x >= g.x1) { g.done = true; S.stats.gaps += 1; addItem(g.name, g.pts); popAtRider(g.name.toUpperCase() + " !", "gap"); }
+      }
+      if (P.vy > 0) {
+        for (const r of rails) {
+          if (P.x < r.x0 || P.x > r.x1) continue;
+          const ry = railY(r, P.x);
+          if (prevY <= ry + 3 && P.y >= ry) {
+            if (P.trick && P.trickT / P.trick.dur < landReq()) { bail(); return; }
+            if (P.trick) completeTrick();
+            P.mode = "grind"; P.rail = r; P.y = ry; P.vy = 0; P.grindT = 0; P.grindPts = 0; P.queued = null;
+            break;
+          }
+        }
+      }
+      if (P.mode === "air") {
+        const gy = groundAt(P.x);
+        if (P.y >= gy && P.vy >= 0) land(gy);
+      }
+    } else if (P.mode === "grind") {
+      P.x = nx;
+      const r = P.rail;
+      P.grindT += dt;
+      P.grindPts += (r.kind === "ledge" ? 30 : 40) * grindMult() * dt;
+      if (P.x >= r.x1) {
+        endGrind();
+        P.mode = "air"; P.vy = -120; P.airT = 0; P.airTricks = 0; P.launched = true; P.airStartX = P.x;
+      } else {
+        P.y = railY(r, P.x);
+        if (Math.random() < dt * 40) sparks(P.x, P.y, 1);
+      }
+    }
+    collectItems();
+  }
+
+  function collectItems() {
+    const cxp = P.x, cyp = P.y - 34;
+    for (const it of items) {
+      if (it.got) continue;
+      if (Math.hypot(it.x - cxp, it.y - cyp) < 34) {
+        it.got = true;
+        if (it.kind === "gold") {
+          const reward = Math.max(perSecond() * 60, 400 * rideMult());
+          gain(reward);
+          S.stats.golds += 1;
+          popAtRider(`Planche dorée +${fmt(reward)}`, "gold");
+          confettiBurst(it.x, it.y, 30, 320);
+        } else if (it.idx === S.letters) {
+          S.letters += 1;
+          popAtRider("SKATE"[it.idx], "gold");
+          if (S.letters >= 5) {
+            const reward = Math.max(perSecond() * 120, 2000 * rideMult());
+            gain(reward);
+            S.letters = 0;
+            S.stats.skate += 1;
+            toast(`S-K-A-T-E complet ! <b>+${fmt(reward)}</b> points de style`);
+            confettiBurst(P.x, P.y - 60, 60, 420);
+          }
+          updateLetters();
+        }
+      }
+    }
+    items = items.filter((it) => !it.got);
+  }
+
+  // ================= Commandes =================
+  let gesture = null;
+  el.game.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    if (!S.tutorial) { S.tutorial = true; el.tuto.hidden = true; save(); }
+    gesture = { id: e.pointerId, x: e.clientX, y: e.clientY, fired: false };
+    try { el.game.setPointerCapture(e.pointerId); } catch { /* ignoré */ }
+    ollie();
+  });
+  el.game.addEventListener("pointermove", (e) => {
+    if (!gesture || gesture.id !== e.pointerId || gesture.fired) return;
+    const dx = e.clientX - gesture.x, dy = e.clientY - gesture.y;
+    if (Math.hypot(dx, dy) > 22) { gesture.fired = true; swipe(dx, dy); }
+  });
+  const endGesture = (e) => { if (gesture && gesture.id === e.pointerId) gesture = null; };
+  el.game.addEventListener("pointerup", endGesture);
+  el.game.addEventListener("pointercancel", endGesture);
+  const KEYS = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowDown: [0, 1], ArrowUp: [0, -1], q: [-1, -1], e: [1, -1], a: [-1, 1], d: [1, 1] };
+  addEventListener("keydown", (e) => {
+    if (e.repeat || e.target.closest?.("button")) return;
+    if (e.key === " ") { e.preventDefault(); ollie(); }
+    else if (KEYS[e.key]) { e.preventDefault(); swipe(KEYS[e.key][0] * 40, KEYS[e.key][1] * 40); }
   });
 
-  function ink(c, fill, build, lw = 2.5) {
-    c.beginPath();
-    build();
-    if (fill) { c.fillStyle = fill; c.fill(); }
-    c.lineWidth = lw;
-    c.strokeStyle = C.ink;
-    c.lineJoin = "round";
-    c.stroke();
+  // ================= Rendu =================
+  const cv = $("scene"), cx = cv.getContext("2d");
+  const tile = document.createElement("canvas"), tx = tile.getContext("2d");
+  let W = 0, H = 0, DPR = 1, SC = 1, TW = 0, HY = 0, EXTRA = 0, tileKey = "";
+  const fx = { sparks: [], confetti: [], dust: [], hearts: [] };
+  let shakeAmt = 0;
+
+  function resizeScene() {
+    const r = el.game.getBoundingClientRect();
+    W = Math.max(1, Math.round(r.width)); H = Math.max(1, Math.round(r.height));
+    DPR = Math.min(window.devicePixelRatio || 1, 2.5);
+    cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+    SC = clamp(H / 430, 0.55, 1.3);
+    TW = Math.max(720, Math.round(W * 1.6));
+    HY = Math.round(H * 0.56);
+    EXTRA = Math.round(H * 0.5);
+    tile.width = Math.round(TW * DPR); tile.height = Math.round((H + EXTRA) * DPR);
+    tileKey = "";
   }
 
-  function drawStatic(st) {
-    const c = lx;
+  function ink(c, fill, build, lw = 2.5) {
+    c.beginPath(); build();
+    if (fill) { c.fillStyle = fill; c.fill(); }
+    c.lineWidth = lw; c.strokeStyle = C.ink; c.lineJoin = "round"; c.lineCap = "round"; c.stroke();
+  }
+  const crewTier = (n) => (n <= 0 ? 0 : n < 10 ? 1 : n < 25 ? 2 : n < 50 ? 3 : 4);
+
+  // Décor lointain (parallaxe) : évolue avec le crew et le park
+  function drawTile() {
+    const c = tx, HT = HY + EXTRA;
     c.setTransform(DPR, 0, 0, DPR, 0, 0);
-    c.clearRect(0, 0, W, H);
-    c.fillStyle = C.paper;
-    c.fillRect(0, 0, W, H);
-
-    // Trame de points riso, plus dense en haut
-    c.fillStyle = "rgba(43, 89, 255, 0.14)";
-    for (let y = 6, row = 0; y < G; y += 11, row++) {
-      const r = 0.6 + 2 * (1 - y / G);
-      for (let x = row % 2 ? 5.5 : 0; x < W; x += 11) { c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fill(); }
+    c.clearRect(0, 0, TW, H + EXTRA);
+    c.fillStyle = "rgba(43, 89, 255, 0.13)";
+    for (let y = 6, row = 0; y < HT; y += 11, row++) {
+      const r = 0.6 + 2 * (1 - y / HT);
+      for (let x = row % 2 ? 5.5 : 0; x < TW; x += 11) { c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fill(); }
     }
-    // Grand soleil : sa couleur change avec le rang
-    const sunR = Math.min(W, H) * 0.24;
-    c.fillStyle = RANKS[st.rank].sun;
-    c.beginPath(); c.arc(W * 0.5, G * 0.55, sunR, 0, Math.PI * 2); c.fill();
-    c.save();
-    c.beginPath(); c.arc(W * 0.5, G * 0.55, sunR, 0, Math.PI * 2); c.clip();
-    c.fillStyle = C.paper;
-    for (let i = 0; i < 4; i++) c.fillRect(W * 0.5 - sunR, G * 0.55 + sunR * (0.15 + i * 0.22), sunR * 2, 3 + i * 2);
-    c.restore();
-
-    // Contest : gradins et guirlande de fanions
-    if (st.xgames) {
-      for (let i = 0; i < 3; i++) {
-        const y = G * (0.42 + i * 0.17);
-        ink(c, i % 2 ? C.blue : "#4a72ff", () => c.rect(-4, y, W + 8, G * 0.17), 2);
-      }
+    const xg = crewTier(owned("xgames")), br = crewTier(owned("brand")), sh = crewTier(owned("shop"));
+    if (xg) {
+      for (let i = 0; i < 3; i++) ink(c, i % 2 ? C.blue : "#4a72ff", () => c.rect(-4, HT - 22 - (2 - i) * 22 - 22, TW + 8, 22), 2);
       c.strokeStyle = C.ink; c.lineWidth = 1.5;
-      c.beginPath(); c.moveTo(0, 14); c.quadraticCurveTo(W / 2, 40, W, 14); c.stroke();
-      for (let x = 10, i = 0; x < W; x += 26, i++) {
-        const t = x / W, y = 14 + 52 * t * (1 - t);
-        ink(c, [C.pink, C.yellow, C.blue][i % 3], () => { c.moveTo(x - 8, y); c.lineTo(x + 8, y); c.lineTo(x, y + 16); c.closePath(); }, 1.5);
-      }
+      c.beginPath(); c.moveTo(0, 12); c.lineTo(TW, 12); c.stroke();
+      for (let x = 10, i = 0; x < TW; x += 26, i++) ink(c, [C.pink, C.yellow, C.blue][i % 3], () => { c.moveTo(x - 8, 12); c.lineTo(x + 8, 12); c.lineTo(x, 28); c.closePath(); }, 1.5);
     }
-    // Panneau publicitaire de ta marque
-    if (st.brand) {
-      const bx = W * 0.04, by = H * 0.08, bw = W * 0.42, bh = H * 0.17;
+    if (br) {
+      const bx = TW * 0.06, by = HT - HY * 0.88, bw = Math.min(260, TW * 0.3), bh = bw * 0.36;
       c.fillStyle = C.ink;
-      c.fillRect(bx + bw * 0.2, by + bh, 5, G - by - bh);
-      c.fillRect(bx + bw * 0.75, by + bh, 5, G - by - bh);
+      c.fillRect(bx + bw * 0.2, by + bh, 5, HT - by - bh); c.fillRect(bx + bw * 0.75, by + bh, 5, HT - by - bh);
       ink(c, C.blue, () => c.rect(bx, by, bw, bh), 3);
-      const fs = Math.min(bh * 0.42, bw / 6.2);
+      const fs = bw / 6.4;
       c.font = `400 ${fs}px Bungee, "Arial Black", sans-serif`;
       c.textAlign = "center"; c.textBaseline = "middle";
       c.fillStyle = C.pink; c.fillText("NEUTRON", bx + bw / 2 + 2.5, by + bh / 2 + 2.5);
       c.fillStyle = C.paper; c.fillText("NEUTRON", bx + bw / 2, by + bh / 2);
-      if (st.brand >= 3) for (let i = 0; i < 4; i++) ink(c, C.yellow, () => c.arc(bx + bw * (0.15 + i * 0.23), by - 4, 4, 0, Math.PI * 2), 1.5);
+      if (br >= 3) for (let i = 0; i < 4; i++) ink(c, C.yellow, () => c.arc(bx + bw * (0.15 + i * 0.23), by - 4, 4, 0, Math.PI * 2), 1.5);
     }
-    // Skateshop sponsor
-    if (st.shop) {
-      const sx = W * 0.6, sw = W * 0.37, sy = G * 0.38;
-      ink(c, C.yellow, () => c.rect(sx, sy, sw, G - sy), 3);
+    if (sh) {
+      const sw = Math.min(220, TW * 0.26), sx = TW * 0.55, sy = HT - sw * 0.75;
+      ink(c, C.yellow, () => c.rect(sx, sy, sw, HT - sy), 3);
       ink(c, C.ink, () => c.rect(sx - 4, sy - 16, sw + 8, 18), 2);
       c.font = `400 ${Math.min(12, sw / 9)}px Bungee, sans-serif`;
       c.textAlign = "center"; c.textBaseline = "middle";
-      c.fillStyle = st.shop >= 2 ? C.pink : C.paper;
+      if (sh >= 2) { c.shadowColor = C.pink; c.shadowBlur = 10; }
+      c.fillStyle = sh >= 2 ? C.pink : C.paper;
       c.fillText("SKATE SHOP", sx + sw / 2, sy - 6);
-      if (st.shop >= 2) { c.shadowColor = C.pink; c.shadowBlur = 10; c.fillText("SKATE SHOP", sx + sw / 2, sy - 6); c.shadowBlur = 0; }
-      for (let i = 0; i < 6; i++) {
-        c.fillStyle = i % 2 ? C.paper : C.pink;
-        c.fillRect(sx + (sw / 6) * i, sy + 2, sw / 6, 10);
-      }
+      c.shadowBlur = 0;
+      for (let i = 0; i < 6; i++) { c.fillStyle = i % 2 ? C.paper : C.pink; c.fillRect(sx + (sw / 6) * i, sy + 2, sw / 6, 10); }
       c.strokeStyle = C.ink; c.lineWidth = 2; c.strokeRect(sx, sy + 2, sw, 10);
-      const wy = sy + 18, wh = G - wy - 8;
+      const wy = sy + 18, wh = HT - wy - 6;
       ink(c, "#bfe0ff", () => c.rect(sx + 8, wy, sw - 16, wh), 2);
-      const decks = Math.min(2 + st.shop, 6);
-      for (let i = 0; i < decks; i++) {
-        const dx = sx + 14 + i * ((sw - 28) / decks);
-        ink(c, [C.pink, C.blue, C.yellow][i % 3], () => c.roundRect(dx, wy + 5, (sw - 28) / decks - 5, wh - 10, 6), 1.5);
+      const n = Math.min(2 + sh, 6);
+      for (let i = 0; i < n; i++) {
+        const dx = sx + 14 + i * ((sw - 28) / n);
+        ink(c, [C.pink, C.blue, C.yellow][i % 3], () => c.roundRect(dx, wy + 5, (sw - 28) / n - 5, wh - 10, 6), 1.5);
       }
     }
-
-    // Sol en béton avec joints en perspective
-    c.fillStyle = C.concrete;
-    c.fillRect(0, G, W, H - G);
-    c.strokeStyle = "rgba(20,20,20,0.18)"; c.lineWidth = 1.5;
-    for (let i = -4; i <= 4; i++) {
-      c.beginPath(); c.moveTo(W / 2 + i * W * 0.12, G); c.lineTo(W / 2 + i * W * 0.32, H); c.stroke();
-    }
-    c.beginPath(); c.moveTo(0, G + (H - G) * 0.45); c.lineTo(W, G + (H - G) * 0.45); c.stroke();
-    c.strokeStyle = C.ink; c.lineWidth = 3;
-    c.beginPath(); c.moveTo(0, G); c.lineTo(W, G); c.stroke();
-
-    // Modules du skatepark
-    if (st.park) {
-      const qw = W * 0.22, qh = G * 0.5;
-      ink(c, C.concrete2, () => { c.moveTo(0, G); c.lineTo(0, G - qh); c.quadraticCurveTo(0, G, qw, G); c.closePath(); }, 3);
-      c.strokeStyle = st.park >= 2 ? C.blue : C.ink; c.lineWidth = 5;
-      c.beginPath(); c.moveTo(0, G - qh); c.lineTo(10, G - qh); c.stroke();
-      if (st.park >= 2) {
-        const fx0 = W * 0.76, fh = G * 0.13;
-        ink(c, C.concrete2, () => { c.moveTo(fx0, G); c.lineTo(fx0 + W * 0.06, G - fh); c.lineTo(W + 4, G - fh); c.lineTo(W + 4, G); c.closePath(); }, 3);
-      }
-      if (st.park >= 3) {
-        c.strokeStyle = C.ink; c.lineWidth = 3;
-        c.beginPath(); c.moveTo(W * 0.8, G - G * 0.13 - 14); c.lineTo(W + 4, G - G * 0.13 - 14); c.stroke();
-        for (const px of [W * 0.84, W * 0.95]) { c.beginPath(); c.moveTo(px, G - G * 0.13 - 14); c.lineTo(px, G - G * 0.13); c.stroke(); }
-      }
-      if (st.park >= 4) {
-        c.save(); c.translate(qw * 0.3, G - qh * 0.35); c.rotate(-0.25);
-        c.font = "400 16px Bungee, sans-serif"; c.fillStyle = C.pink; c.textAlign = "center";
-        c.fillText("SK8", 0, 0); c.restore();
-      }
-    }
-    // Curb (ledge) derrière la planche, brillant avec le wax
-    const lx0 = W * 0.27, lw = W * 0.46, lh = Math.max(14, (H - G) * 0.18), ly = G + (H - G) * 0.12;
-    ink(c, C.concrete2, () => c.rect(lx0, ly, lw, lh), 2.5);
-    ink(c, "#ddd8cc", () => c.rect(lx0, ly - 6, lw, 6), 2.5);
-    if (st.wax) {
-      c.fillStyle = st.wax >= 2 ? C.pink : "rgba(255,255,255,0.9)";
-      c.fillRect(lx0 + 8, ly - 4.5, lw * (0.3 + st.wax * 0.2), 3);
-    }
-    // Caméras de la part vidéo
-    if (st.video) {
-      const camX = W * 0.9, foot = H - 6;
-      c.fillStyle = "rgba(255, 212, 0, 0.28)";
-      c.beginPath(); c.moveTo(camX - 10, foot - 64); c.lineTo(W * 0.62, H * 0.66); c.lineTo(W * 0.62, H * 0.95); c.closePath(); c.fill();
-      c.strokeStyle = C.ink; c.lineWidth = 2.5;
-      for (const dx of [-14, 0, 14]) { c.beginPath(); c.moveTo(camX, foot - 50); c.lineTo(camX + dx, foot); c.stroke(); }
-      ink(c, C.ink, () => c.roundRect(camX - 16, foot - 72, 30, 22, 3), 2);
-      ink(c, C.blue, () => c.arc(camX - 18, foot - 61, 7, 0, Math.PI * 2), 2);
-      if (st.video >= 3) {
-        c.strokeStyle = C.ink; c.lineWidth = 3;
-        c.beginPath(); c.moveTo(W * 0.04, H); c.lineTo(W * 0.1, G - 10); c.lineTo(W * 0.3, G - 40); c.stroke();
-        ink(c, C.ink, () => c.roundRect(W * 0.3 - 10, G - 50, 24, 18, 3), 2);
-      }
+    // Grillage du park et panneau quand le park prend forme
+    c.strokeStyle = "rgba(20,20,20,0.35)"; c.lineWidth = 1;
+    const fenceTop = HT - 34;
+    for (let x = 0; x < TW; x += 12) { c.beginPath(); c.moveTo(x, fenceTop); c.lineTo(x + 12, HT); c.moveTo(x + 12, fenceTop); c.lineTo(x, HT); c.stroke(); }
+    c.strokeStyle = C.ink; c.lineWidth = 2.5;
+    c.beginPath(); c.moveTo(0, fenceTop); c.lineTo(TW, fenceTop); c.stroke();
+    for (let x = 0; x < TW; x += 96) { c.beginPath(); c.moveTo(x, fenceTop - 4); c.lineTo(x, HT); c.stroke(); }
+    if (parkCount() >= 3) {
+      const px = TW * 0.32;
+      ink(c, C.pink, () => c.rect(px, fenceTop - 30, 150, 26), 2.5);
+      c.font = "400 13px Bungee, sans-serif"; c.textAlign = "center"; c.textBaseline = "middle";
+      c.fillStyle = C.ink; c.fillText("SKATEPARK", px + 75, fenceTop - 17);
     }
   }
 
   function person(c, x, foot, s, shirt, opts = {}) {
-    c.save();
-    c.translate(x, foot);
-    c.scale(s, s);
+    c.save(); c.translate(x, foot); c.scale(opts.flip ? -s : s, s);
     c.fillStyle = C.ink;
-    c.fillRect(-7, -26, 5, 26);
-    c.fillRect(2, -26, 5, 26);
+    c.fillRect(-7, -26, 5, 26); c.fillRect(2, -26, 5, 26);
     ink(c, shirt, () => c.roundRect(-11, -54, 22, 30, 8), 2.5);
     ink(c, C.paper, () => c.arc(0, -63, 9, 0, Math.PI * 2), 2.5);
     c.fillStyle = opts.cap || C.ink;
-    c.beginPath(); c.arc(0, -65, 9.5, Math.PI, 0); c.fill();
-    c.fillRect(opts.flip ? -15 : 0, -67, 15, 3.5);
+    c.beginPath(); c.arc(0, -65, 9.5, Math.PI, 0); c.fill(); c.fillRect(0, -67, 15, 3.5);
     if (opts.cam) {
       ink(c, C.ink, () => c.roundRect(7, -52, 15, 11, 2), 1.5);
       c.fillStyle = opts.blink ? "#ff2a2a" : "#5a1010";
@@ -896,310 +1077,381 @@
     }
     if (opts.board) {
       ink(c, opts.board, () => c.roundRect(-20, 0, 40, 6, 3), 2);
-      c.fillStyle = C.ink;
-      c.beginPath(); c.arc(-12, 9, 3, 0, Math.PI * 2); c.arc(12, 9, 3, 0, Math.PI * 2); c.fill();
+      c.fillStyle = C.ink; c.beginPath(); c.arc(-12, 9, 3, 0, Math.PI * 2); c.arc(12, 9, 3, 0, Math.PI * 2); c.fill();
     }
     c.restore();
   }
 
-  // Positions des éléments du crew dans la scène (pour les gains qui s'envolent)
-  function anchor(id) {
-    switch (id) {
-      case "pote": return { x: W * 0.12, y: H * 0.7 };
-      case "park": return { x: W * 0.08, y: G * 0.62 };
-      case "insta": return { x: W * 0.88, y: H * 0.14 };
-      case "shop": return { x: W * 0.78, y: G * 0.5 };
-      case "video": return { x: W * 0.88, y: H * 0.68 };
-      case "team": return { x: W * 0.5, y: G - 40 };
-      case "brand": return { x: W * 0.25, y: H * 0.16 };
-      case "xgames": return { x: W * 0.5, y: G * 0.35 };
-      default: return { x: W / 2, y: H / 2 };
-    }
-  }
-
-  let heartTimer = 0, prodTimer = 0;
-  function drawScene(t, dt) {
-    const st = sceneState();
-    const key = JSON.stringify(st) + W + "x" + H;
-    if (key !== sceneKey) { sceneKey = key; drawStatic(st); }
-    cx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    cx.clearRect(0, 0, W, H);
-    cx.drawImage(layer, 0, 0, W, H);
-
+  function drawBackground(t) {
+    const c = cx;
+    c.setTransform(DPR, 0, 0, DPR, 0, 0);
+    c.fillStyle = C.paper; c.fillRect(0, 0, W, H);
+    // Le décor suit la caméra verticalement pour rester posé sur le sol
+    const dy = clamp(-camY * SC - HY, -H * 0.5, H * 0.5);
+    const sunR = Math.min(W, H) * 0.22, sx = W * 0.7, sy = HY * 0.5 + dy * 0.6;
+    c.fillStyle = RANKS[S.rank].sun;
+    c.beginPath(); c.arc(sx, sy, sunR, 0, Math.PI * 2); c.fill();
+    c.save(); c.beginPath(); c.arc(sx, sy, sunR, 0, Math.PI * 2); c.clip();
+    c.fillStyle = C.paper;
+    for (let i = 0; i < 4; i++) c.fillRect(sx - sunR, sy + sunR * (0.15 + i * 0.22), sunR * 2, 3 + i * 2);
+    c.restore();
+    const key = [W, H, S.rank, parkCount(), crewTier(owned("xgames")), crewTier(owned("brand")), crewTier(owned("shop"))].join(",");
+    if (key !== tileKey) { tileKey = key; drawTile(); }
+    const off = ((camX * SC * 0.25) % TW + TW) % TW;
+    c.drawImage(tile, -off, dy - EXTRA, TW, H + EXTRA);
+    c.drawImage(tile, TW - off, dy - EXTRA, TW, H + EXTRA);
     // Foule du contest
-    if (st.xgames) {
-      const rows = 3, per = Math.ceil(W / 16);
-      const fill = Math.min(1, 0.35 + st.xgames * 0.17);
-      for (let r = 0; r < rows; r++) {
-        const y = G * (0.42 + r * 0.17) - 2;
-        for (let i = 0; i < per; i++) {
+    const xg = crewTier(owned("xgames"));
+    if (xg) {
+      const fill = 0.35 + xg * 0.16;
+      for (let r = 0; r < 3; r++) {
+        const y = HY - 22 - (2 - r) * 22 - 24 + dy;
+        for (let i = 0; i * 16 < TW; i++) {
           if (((i * 7 + r * 13) % 10) / 10 > fill) continue;
-          const x = i * 16 + (r % 2) * 8 + 4;
-          // Pas de spectateurs devant le shop ni devant le panneau
-          if (st.shop && x > W * 0.6 - 8 && x < W * 0.97 + 8 && y > G * 0.38 - 20) continue;
-          if (st.brand && x > W * 0.04 - 8 && x < W * 0.46 + 8 && y < H * 0.25 + 8) continue;
+          let x = i * 16 + (r % 2) * 8 + 4 - off;
+          if (x < -10) x += TW;
+          if (x > W + 10) continue;
           const bob = Math.max(0, Math.sin(t * 6 + i * 0.9 + r)) * 4;
-          cx.fillStyle = [C.pink, C.yellow, C.paper][(i + r) % 3];
-          cx.beginPath(); cx.arc(x, y - bob, 5.5, 0, Math.PI * 2); cx.fill();
-          cx.lineWidth = 1.5; cx.strokeStyle = C.ink; cx.stroke();
+          c.fillStyle = [C.pink, C.yellow, C.paper][(i + r) % 3];
+          c.beginPath(); c.arc(x, y - bob, 5.5, 0, Math.PI * 2); c.fill();
+          c.lineWidth = 1.5; c.strokeStyle = C.ink; c.stroke();
         }
       }
     }
-    // Pros de la team qui roulent au fond
+    // Pros de la team au fond
     const team = Math.min(4, owned("team"));
     for (let i = 0; i < team; i++) {
-      const speed = 40 + i * 13, span = W + 120;
-      const dir = i % 2 ? -1 : 1;
-      let x = ((t * speed + i * span / team) % span) - 60;
+      const span = W + 120, dir = i % 2 ? -1 : 1;
+      let x = ((t * (50 + i * 15) + i * span / team) % span) - 60;
       if (dir < 0) x = W - x;
-      person(cx, x, G - 2, 0.55, [C.pink, C.blue, C.yellow, C.paper][i], { board: C.yellow, cap: C.blue, flip: dir < 0 });
+      person(c, x, HY - 6 + dy, 0.45, [C.pink, C.blue, C.yellow, C.paper][i], { board: C.yellow, cap: C.blue, flip: dir < 0 });
     }
-    // Étincelles du wax sur le curb
-    if (st.wax) {
-      const lx0 = W * 0.27, ly = G + (H - G) * 0.12 - 4;
-      for (let i = 0; i < st.wax * 2; i++) {
-        const a = Math.max(0, Math.sin(t * 3 + i * 2.1));
-        if (a < 0.6) continue;
-        const x = lx0 + 10 + ((i * 53) % Math.max(20, W * 0.44));
-        cx.fillStyle = `rgba(255,255,255,${a})`;
-        star(cx, x, ly, 2 + a * 3);
+  }
+
+  function drawWorld(t) {
+    const c = cx;
+    const s = SC * DPR;
+    const shx = shakeAmt ? rand(-shakeAmt, shakeAmt) : 0, shy = shakeAmt ? rand(-shakeAmt, shakeAmt) : 0;
+    c.setTransform(s, 0, 0, s, (-camX + shx) * s, (-camY + shy) * s);
+    const vw = W / SC, vh = H / SC, left = camX - 60, right = camX + vw + 60, bottom = camY + vh + 60;
+
+    // Sol
+    c.beginPath();
+    let first = true;
+    for (let i = 0; i < GP.length; i++) {
+      const p = GP[i];
+      if (p.x < left - 400) continue;
+      if (first) { c.moveTo(p.x, p.y); first = false; } else c.lineTo(p.x, p.y);
+      if (p.x > right + 400) break;
+    }
+    c.lineTo(right + 400, bottom); c.lineTo(left - 400, bottom); c.closePath();
+    c.fillStyle = C.concrete; c.fill();
+    // Joints du béton
+    c.strokeStyle = "rgba(20,20,20,0.12)"; c.lineWidth = 1.5;
+    for (let x = Math.floor(left / 120) * 120; x < right; x += 120) { const gy = groundAt(x); c.beginPath(); c.moveTo(x, gy + 4); c.lineTo(x - 18, bottom); c.stroke(); }
+    c.beginPath(); first = true;
+    for (let i = 0; i < GP.length; i++) {
+      const p = GP[i];
+      if (p.x < left - 400) continue;
+      if (first) { c.moveTo(p.x, p.y); first = false; } else c.lineTo(p.x, p.y);
+      if (p.x > right + 400) break;
+    }
+    c.strokeStyle = C.ink; c.lineWidth = 3.5; c.lineJoin = "round"; c.stroke();
+
+    // Modules
+    for (const d of decos) {
+      if (d.x1 !== undefined && (d.x1 < left || d.x0 > right)) continue;
+      if (d.t === "kicker") {
+        ink(c, C.concrete2, () => { c.moveTo(d.x0, 0); c.lineTo(d.x1, -d.h); c.lineTo(d.x1, 0); c.closePath(); }, 3);
+        c.strokeStyle = C.blue; c.lineWidth = 4; c.beginPath(); c.moveTo(d.x1 - 6, -d.h + 3); c.lineTo(d.x1, -d.h); c.stroke();
+        if (d.label) { c.font = `400 ${Math.min(20, d.h * 0.3)}px Bungee, sans-serif`; c.fillStyle = C.pink; c.textAlign = "center"; c.fillText(d.label, d.x0 + (d.x1 - d.x0) * 0.68, -d.h * 0.25); }
+      } else if (d.t === "ledge") {
+        ink(c, C.concrete2, () => c.rect(d.x0, -d.h, d.x1 - d.x0, d.h), 3);
+        ink(c, "#ddd8cc", () => c.rect(d.x0, -d.h, d.x1 - d.x0, 6), 2.5);
+        if (lvl("wax")) { c.fillStyle = lvl("wax") >= 4 ? C.pink : "rgba(255,255,255,0.9)"; c.fillRect(d.x0 + 8, -d.h + 1.5, (d.x1 - d.x0) * Math.min(0.9, 0.3 + lvl("wax") * 0.07), 2.5); }
+      } else if (d.t === "funbox") {
+        ink(c, C.concrete2, () => { c.moveTo(d.x0, 0); c.lineTo(d.x0 + 70, -d.h); c.lineTo(d.x0 + 290, -d.h); c.lineTo(d.x1, 0); c.closePath(); }, 3);
+        c.fillStyle = "rgba(20,20,20,0.08)"; c.fillRect(d.x0 + 90, -d.h + 8, 180, d.h - 12);
+      } else if (d.t === "stairs") {
+        ink(c, C.concrete2, () => { c.moveTo(d.b0, 0); c.lineTo(d.b0 + 90, -d.h); c.lineTo(d.x0, -d.h); c.lineTo(d.x1, 0); c.closePath(); }, 3);
+        c.strokeStyle = C.ink; c.lineWidth = 2;
+        const steps = 6;
+        c.beginPath();
+        for (let i = 0; i <= steps; i++) {
+          const x = d.x0 + (d.x1 - d.x0) * (i / steps), y = -d.h + d.h * (i / steps);
+          if (i === 0) c.moveTo(x, y); else { c.lineTo(x, y - d.h / steps); c.lineTo(x, y); }
+        }
+        c.stroke();
+      } else if (d.t === "pit") {
+        c.fillStyle = "rgba(20,20,20,0.12)"; c.fillRect(d.x0, 0, d.x1 - d.x0 - 70, d.depth);
+        for (let x = d.x0 + 6; x < d.x1 - 80; x += 22) { c.fillStyle = C.yellow; c.fillRect(x, -4, 11, 4); }
+      } else if (d.t === "filmer") {
+        if (d.x < left || d.x > right) continue;
+        person(c, d.x, groundAt(d.x), 0.7, d.color, { cam: true, blink: Math.sin(t * 4 + d.x) > 0, flip: false });
       }
     }
-    // Potes qui filment
-    const potes = Math.min(4, Math.ceil(owned("pote") / 5));
-    for (let i = 0; i < potes; i++) {
-      person(cx, W * (0.07 + i * 0.075), H - 8 - (i % 2) * 6, 0.72, [C.yellow, C.pink, C.blue, C.paper][i], { cam: true, blink: Math.sin(t * 4 + i) > 0 });
+    // Barres
+    for (const r of rails) {
+      if (r.x1 < left || r.x0 > right) continue;
+      if (r.kind === "rail") {
+        c.strokeStyle = C.ink; c.lineWidth = 2.5;
+        for (let x = r.x0 + 10; x < r.x1; x += 70) { c.beginPath(); c.moveTo(x, railY(r, x)); c.lineTo(x, groundAt(x)); c.stroke(); }
+        c.strokeStyle = C.ink; c.lineWidth = 6; c.beginPath(); c.moveTo(r.x0, r.y0); c.lineTo(r.x1, r.y1); c.stroke();
+        c.strokeStyle = lvl("wax") >= 4 ? C.pink : C.metal; c.lineWidth = 2.5; c.beginPath(); c.moveTo(r.x0, r.y0); c.lineTo(r.x1, r.y1); c.stroke();
+      }
     }
-    // Téléphone Insta et pluie de likes
+    // Objets à ramasser
+    for (const it of items) {
+      if (it.x < left || it.x > right) continue;
+      const bob = Math.sin(t * 4 + it.x) * 4;
+      if (it.kind === "gold") {
+        c.save(); c.translate(it.x, it.y + bob); c.rotate(Math.sin(t * 5) * 0.3);
+        c.shadowColor = C.yellow; c.shadowBlur = 16;
+        ink(c, C.yellow, () => c.roundRect(-24, -6, 48, 12, 6), 2.5);
+        c.restore();
+      } else if (it.idx === S.letters) {
+        c.save(); c.translate(it.x, it.y + bob);
+        ink(c, C.yellow, () => c.arc(0, 0, 15, 0, Math.PI * 2), 2.5);
+        c.font = "400 15px Bungee, sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillStyle = C.ink;
+        c.fillText("SKATE"[it.idx], 0, 1);
+        c.restore();
+      }
+    }
+    // Filmeur de la part vidéo
+    if (owned("video") && P.mode !== "bail") {
+      const fxp = P.x - 120;
+      person(c, fxp, groundAt(fxp) - 9, 0.75, C.blue, { board: C.pink, cam: true, blink: Math.sin(t * 5) > 0 });
+    }
+    drawRider(c, t);
+    // Particules (coordonnées du monde)
+    for (const p of fx.dust) { c.globalAlpha = Math.max(0, p.life); c.fillStyle = C.concrete2; c.beginPath(); c.arc(p.x, p.y, p.r, 0, Math.PI * 2); c.fill(); }
+    for (const p of fx.sparks) { c.globalAlpha = Math.max(0, p.life); c.fillStyle = p.color; c.fillRect(p.x - 2, p.y - 2, 4, 4); }
+    for (const p of fx.confetti) {
+      c.save(); c.translate(p.x, p.y); c.rotate(p.rot);
+      c.globalAlpha = Math.max(0, Math.min(1, p.life * 2));
+      c.fillStyle = p.color; c.fillRect(-4, -2.5, 8, 5);
+      c.restore();
+    }
+    c.globalAlpha = 1;
+  }
+
+  // ----- Rider et planche -----
+  const SHOE_COLORS = [C.paper, C.paper, C.pink, C.yellow];
+  function drawBoard(c, anim, p, oy) {
+    let sx = 1, sy = 1, rot = 0, pivot = 0;
+    switch (anim) {
+      case "kick": case "heel": sy = Math.cos(p * Math.PI * 2); break;
+      case "shove": sx = Math.cos(p * Math.PI); break;
+      case "tre": sx = Math.cos(p * Math.PI * 2); sy = Math.cos(p * Math.PI * 2); break;
+      case "hard": sy = Math.cos(p * Math.PI * 2); rot = Math.sin(p * Math.PI) * 1.2; break;
+      case "imp": rot = p * Math.PI * 2; pivot = -22; break;
+    }
+    c.save();
+    c.translate(0, -6 + oy);
+    c.translate(pivot, 0); c.rotate(rot); c.translate(-pivot, 0);
+    c.scale(Math.abs(sx) < 0.08 ? 0.08 : sx, 1);
+    const th = 6 * Math.abs(sy) + 1.4, up = sy >= 0;
+    if (Math.abs(sy) > 0.2) {
+      const wy = up ? th / 2 + 3 : -th / 2 - 3;
+      for (const wx of [-15, 15]) ink(c, tierOf(lvl("bearings"), [1, 3, 5]) ? [C.paper, C.yellow, C.pink, C.blue][tierOf(lvl("bearings"), [1, 3, 5])] : C.paper, () => c.arc(wx, wy, 3.6, 0, Math.PI * 2), 2);
+    }
+    const gripTier = tierOf(lvl("grip"), [5, 15]);
+    ink(c, up ? C.ink : DECK_COLORS[S.rank], () => c.roundRect(-26, -th / 2, 52, th, th / 2), 2);
+    if (up && gripTier) { c.fillStyle = gripTier > 1 ? C.yellow : C.pink; c.fillRect(-4, -th / 2 + 1, 8, Math.max(1, th - 2)); }
+    c.restore();
+  }
+
+  function limb(c, pts, w, color) {
+    c.strokeStyle = color; c.lineWidth = w; c.lineCap = "round"; c.lineJoin = "round";
+    c.beginPath(); c.moveTo(pts[0], pts[1]);
+    for (let i = 2; i < pts.length; i += 2) c.lineTo(pts[i], pts[i + 1]);
+    c.stroke();
+  }
+
+  function drawRider(c, t) {
+    c.save();
+    c.translate(P.x, P.y);
+    if (P.mode === "bail") {
+      const k = clamp((1.1 - P.bailT) * 4, 0, 1);
+      c.save(); c.translate(30 + k * 20, -4); c.rotate(k * 2.5); drawBoard(c, null, 0, 0); c.restore();
+      c.rotate(-k * 1.45);
+      drawBody(c, 0.2, "bail", t);
+      c.restore();
+      return;
+    }
+    let ang = 0;
+    if (P.mode === "ground") ang = Math.atan2(groundAt(P.x + 10) - groundAt(P.x - 10), 20);
+    else if (P.mode === "grind" && P.rail) ang = Math.atan2(P.rail.y1 - P.rail.y0, P.rail.x1 - P.rail.x0) * 0.8;
+    else if (P.mode === "air") ang = clamp(P.vy / 2500, -0.25, 0.3);
+    c.rotate(ang);
+    const tr = P.trick, p = tr ? clamp(P.trickT / tr.dur, 0, 1) : 0;
+    if (tr && tr.anim === "nine") { c.translate(0, -34); c.rotate(p * Math.PI * 5); c.translate(0, 34); }
+    const flipping = tr && ["kick", "heel", "shove", "tre", "hard", "imp"].includes(tr.anim);
+    const oy = flipping ? Math.sin(p * Math.PI) * 12 : 0;
+    const crouch = P.mode === "air" ? (tr ? 0.9 : 0.5) : P.mode === "grind" ? 0.5 : P.crouch * 0.8;
+    drawBoard(c, tr ? tr.anim : null, p, oy);
+    if (P.mode === "grind") { c.fillStyle = C.yellow; c.beginPath(); c.arc(0, -1, 3, 0, Math.PI * 2); c.fill(); }
+    drawBody(c, crouch, tr && tr.anim === "grab" ? "grab" : P.mode, t);
+    c.restore();
+  }
+
+  function drawBody(c, crouch, pose, t) {
+    const footY = -12;
+    const hipY = footY - (32 - crouch * 13);
+    const shoulderY = hipY - 24;
+    const lean = pose === "air" ? 3 : 4;
+    const shoe = SHOE_COLORS[tierOf(lvl("shoes"), [1, 3, 5])];
+    const kneeF = 7 + crouch * 6;
+    // Jambes
+    limb(c, [-12, footY, -12 + kneeF, (footY + hipY) / 2, -2, hipY], 6.5, C.ink);
+    limb(c, [12, footY, 12 + kneeF * 0.6, (footY + hipY) / 2, 3, hipY], 6.5, C.ink);
+    ink(c, shoe, () => c.roundRect(-18, footY - 3, 12, 6, 3), 1.8);
+    ink(c, shoe, () => c.roundRect(7, footY - 3, 12, 6, 3), 1.8);
+    // Torse
+    c.save(); c.translate(0, hipY); c.rotate(0.12 + crouch * 0.25);
+    ink(c, C.blue, () => c.roundRect(-9, -26, 18, 28, 7), 2.5);
+    // Bras
+    if (pose === "grab") limb(c, [3, -20, 10, -6, 8, 18], 4.5, C.ink);
+    else if (pose === "bail") limb(c, [-2, -20, -14, -32], 4.5, C.ink);
+    else {
+      const sw = Math.sin(t * 3) * 3;
+      limb(c, [-3, -20, -15, -12 + sw, -22, -18 + sw], 4.5, C.ink);
+      limb(c, [4, -20, 15, -14 - sw, 22, -6 - sw], 4.5, C.ink);
+    }
+    // Tête et casquette
+    ink(c, C.paper, () => c.arc(lean - 2, -35, 8.5, 0, Math.PI * 2), 2.5);
+    c.fillStyle = C.pink; c.beginPath(); c.arc(lean - 2, -37, 9, Math.PI, 0); c.fill();
+    c.fillRect(lean - 2, -39, 13, 3.5);
+    c.restore();
+  }
+
+  function drawScreenFx(dt) {
+    const c = cx;
+    c.setTransform(DPR, 0, 0, DPR, 0, 0);
+    // Likes Insta
     if (owned("insta")) {
-      const a = anchor("insta");
-      cx.save(); cx.translate(a.x, a.y); cx.rotate(0.12);
-      ink(cx, C.ink, () => cx.roundRect(-14, -22, 28, 44, 5), 2);
-      ink(cx, C.pink, () => cx.roundRect(-10, -17, 20, 32, 2), 1.5);
-      heart(cx, 0, 0, 6, C.paper);
-      cx.restore();
       heartTimer -= dt;
       if (heartTimer <= 0) {
-        heartTimer = 1.4 / Math.min(6, 1 + owned("insta") / 5);
-        fx.hearts.push({ x: a.x + rand(-10, 10), y: a.y - 20, vx: rand(-14, 14), life: 1 });
+        heartTimer = 1.6 / Math.min(6, 1 + owned("insta") / 5);
+        fx.hearts.push({ x: W - rand(20, 70), y: H * 0.3, vx: rand(-10, 10), life: 1 });
       }
     }
     for (const h of fx.hearts) {
-      h.y -= 34 * dt; h.x += h.vx * dt; h.life -= dt * 0.6;
-      cx.globalAlpha = Math.max(0, h.life);
-      heart(cx, h.x, h.y, 5, C.pink);
+      h.y -= 30 * dt; h.x += h.vx * dt; h.life -= dt * 0.55;
+      c.globalAlpha = Math.max(0, h.life);
+      heart(c, h.x, h.y, 6, C.pink);
     }
-    cx.globalAlpha = 1;
+    c.globalAlpha = 1;
     fx.hearts = fx.hearts.filter((h) => h.life > 0);
-
-    // Gains automatiques qui s'envolent de chaque membre du crew
-    prodTimer -= dt;
-    if (prodTimer <= 0) {
-      prodTimer = 1;
-      CREW.forEach((c) => {
-        if (!owned(c.id)) return;
-        const a = anchor(c.id);
-        fx.floats.push({ x: a.x + rand(-8, 8), y: a.y, text: "+" + fmt(crewRate(c)), life: 1, color: c.color });
-      });
-    }
-    cx.textAlign = "center"; cx.textBaseline = "middle";
-    cx.font = '800 15px "Barlow Condensed", "Arial Narrow", sans-serif';
-    for (const f of fx.floats) {
-      f.y -= 26 * dt; f.life -= dt * 0.8;
-      cx.globalAlpha = Math.max(0, Math.min(1, f.life * 1.5));
-      cx.lineWidth = 4; cx.strokeStyle = C.paper; cx.strokeText(f.text, f.x, f.y);
-      cx.fillStyle = C.ink; cx.fillText(f.text, f.x, f.y);
-    }
-    cx.globalAlpha = 1;
-    fx.floats = fx.floats.filter((f) => f.life > 0);
-
-    // Anneaux qui signalent un nouvel élément dans le spot
-    for (const fl of fx.flashes) {
-      fl.life -= dt * 0.5;
-      const a = anchor(fl.id);
-      const pr = 1 - fl.life;
-      cx.globalAlpha = Math.max(0, fl.life);
-      cx.strokeStyle = C.pink; cx.lineWidth = 4;
-      cx.beginPath(); cx.arc(a.x, a.y, 14 + pr * 50, 0, Math.PI * 2); cx.stroke();
-      cx.strokeStyle = C.ink; cx.lineWidth = 2;
-      cx.beginPath(); cx.arc(a.x, a.y, 8 + pr * 36, 0, Math.PI * 2); cx.stroke();
-    }
-    cx.globalAlpha = 1;
-    fx.flashes = fx.flashes.filter((f) => f.life > 0);
-
-    // Étincelles des roues
-    for (const s of fx.sparks) {
-      s.x += s.vx * dt; s.y += s.vy * dt; s.vy += 500 * dt; s.life -= dt * 2;
-      cx.globalAlpha = Math.max(0, s.life);
-      cx.fillStyle = s.color;
-      cx.fillRect(s.x - 2, s.y - 2, 4, 4);
-    }
-    cx.globalAlpha = 1;
-    fx.sparks = fx.sparks.filter((s) => s.life > 0);
-
-    // Confettis
-    for (const p of fx.confetti) {
-      p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 260 * dt; p.vx *= 0.99; p.rot += p.vr * dt; p.life -= dt * 0.45;
-      cx.save(); cx.translate(p.x, p.y); cx.rotate(p.rot);
-      cx.globalAlpha = Math.max(0, Math.min(1, p.life * 2));
-      cx.fillStyle = p.color; cx.fillRect(-4, -2.5, 8, 5);
-      cx.restore();
-    }
-    cx.globalAlpha = 1;
-    fx.confetti = fx.confetti.filter((p) => p.life > 0 && p.y < H + 20);
-    if (st.xgames >= 2 && Math.random() < dt * 1.5) confettiBurst(rand(0, W), -10, 6, 120);
   }
-
+  let heartTimer = 0;
   function heart(c, x, y, s, color) {
-    c.fillStyle = color;
-    c.beginPath();
+    c.fillStyle = color; c.beginPath();
     c.moveTo(x, y + s);
     c.bezierCurveTo(x - s * 1.8, y - s * 0.4, x - s * 0.6, y - s * 1.6, x, y - s * 0.5);
     c.bezierCurveTo(x + s * 0.6, y - s * 1.6, x + s * 1.8, y - s * 0.4, x, y + s);
-    c.fill();
-    c.lineWidth = 1.2; c.strokeStyle = C.ink; c.stroke();
+    c.fill(); c.lineWidth = 1.2; c.strokeStyle = C.ink; c.stroke();
   }
-  function star(c, x, y, r) {
-    c.beginPath();
-    for (let i = 0; i < 8; i++) {
-      const rr = i % 2 ? r * 0.35 : r, a = (i * Math.PI) / 4;
-      c.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr);
-    }
-    c.closePath(); c.fill();
+
+  function updateFx(dt) {
+    for (const p of fx.sparks) { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 700 * dt; p.life -= dt * 2.2; }
+    for (const p of fx.dust) { p.x += p.vx * dt; p.y += p.vy * dt; p.r += dt * 8; p.life -= dt * 2; }
+    for (const p of fx.confetti) { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 300 * dt; p.vx *= 0.99; p.rot += p.vr * dt; p.life -= dt * 0.5; }
+    fx.sparks = fx.sparks.filter((p) => p.life > 0);
+    fx.dust = fx.dust.filter((p) => p.life > 0);
+    fx.confetti = fx.confetti.filter((p) => p.life > 0);
+    shakeAmt = Math.max(0, shakeAmt - dt * 30);
+    if (crewTier(owned("xgames")) >= 2 && Math.random() < dt * 1.2) confettiBurst(camX + rand(0, W / SC), camY - 10, 6, 100);
   }
+  function sparks(x, y, n) {
+    const color = [C.yellow, C.yellow, C.pink, C.blue][tierOf(lvl("bearings"), [1, 3, 5])];
+    for (let i = 0; i < n * 3; i++) fx.sparks.push({ x, y, vx: rand(-260, -60), vy: rand(-200, -40), life: 1, color });
+  }
+  function dust(x, y) { for (let i = 0; i < 8; i++) fx.dust.push({ x: x + rand(-20, 20), y: y - 2, vx: rand(-60, 60), vy: rand(-40, -5), r: rand(2, 4), life: 1 }); }
   function confettiBurst(x, y, n, power) {
     for (let i = 0; i < n; i++) {
       const a = rand(-Math.PI, 0), v = rand(0.3, 1) * power;
       fx.confetti.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, rot: rand(0, 6), vr: rand(-8, 8), life: 1, color: [C.pink, C.yellow, C.blue, C.ink][i % 4] });
     }
   }
-  const WHEEL_COLORS = [C.paper, C.yellow, C.pink, C.blue];
-  function wheelSparks() {
-    const t = tierOf(lvl("bearings"), GEAR[1].tiers);
-    if (!t) return;
-    const color = WHEEL_COLORS[t];
-    for (let i = 0; i < 4 + t * 3; i++) {
-      fx.sparks.push({ x: W / 2 + rand(-W * 0.2, W * 0.2), y: H * 0.82, vx: rand(-120, 120), vy: rand(-220, -60), life: 1, color });
-    }
-  }
+  function shake(a) { if (!matchMedia("(prefers-reduced-motion: reduce)").matches) shakeAmt = a; }
 
-  // ================= Apparence de la planche =================
-  let lookKey = "";
-  function applyBoardLook() {
-    const grip = tierOf(lvl("grip"), GEAR[0].tiers);
-    const wheels = tierOf(lvl("bearings"), GEAR[1].tiers);
-    const shoes = tierOf(lvl("shoes"), GEAR[3].tiers);
-    const key = `${grip}-${wheels}-${shoes}-${S.rank}`;
-    if (key === lookKey) return;
-    lookKey = key;
-    el.grip.className = "face top" + (grip ? ` grip-${grip}` : "");
-    el.deck.className = "face bottom" + (S.rank ? ` deck-${S.rank}` : "");
-    el.deck.style.setProperty("--wheel", WHEEL_COLORS[wheels]);
-    el.board.className = "board" + (shoes ? ` has-shoes shoes-${shoes}` : "");
-  }
-
-  // ================= Tape sur la planche =================
-  const R = (z, x, y) => ({ transform: `rotateZ(${z}deg) rotateX(${x}deg) rotateY(${y}deg)` });
-  const ANIMS = {
-    ollie:      [R(0, 0, 0), R(-8, -18, 0), R(0, 0, 0)],
-    kickflip:   [R(0, 0, 0), R(-4, 180, 0), R(0, 360, 0)],
-    heelflip:   [R(0, 0, 0), R(4, -180, 0), R(0, -360, 0)],
-    shoveit:    [R(0, 0, 0), R(90, -10, 0), R(180, 0, 0)],
-    treflip:    [R(0, 0, 0), R(180, 180, 0), R(360, 360, 0)],
-    hardflip:   [R(0, 0, 0), R(90, 180, 90), R(180, 360, 180)],
-    impossible: [R(0, 0, 0), R(0, 0, 180), R(0, 0, 360)],
-    nine:       [R(0, 0, 0), R(450, 0, 0), R(900, 0, 0)],
-  };
-  const LIFT = { ollie: 40, kickflip: 52, heelflip: 52, shoveit: 46, treflip: 62, hardflip: 62, impossible: 64, nine: 76 };
-  let combo = 0, comboUntil = 0, boardAnim = null, liftAnim = null;
-  const COMBO_WINDOW = 1100;
-  const comboMult = () => Math.min(comboCap(lvl("bearings")), 1 + combo * 0.03);
-  const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  function pickTrick() {
-    const learned = TRICKS.filter((t) => S.tricks[t.id]);
-    const weights = learned.map((_, i) => i + 1);
-    let r = Math.random() * weights.reduce((a, b) => a + b, 0);
-    for (let i = 0; i < learned.length; i++) { r -= weights[i]; if (r <= 0) return learned[i]; }
-    return learned[learned.length - 1];
-  }
-
-  function popText(x, y, title, amount, gold) {
+  // ================= HUD =================
+  function popAtRider(text, kind) {
+    const x = (P.x - camX) * SC, y = (P.y - camY - 100) * SC;
     const p = document.createElement("div");
-    p.className = "pop" + (gold ? " gold" : "");
-    p.style.left = x + "px";
-    p.style.top = y + "px";
+    p.className = "pop" + (kind ? " " + kind : "");
+    p.style.left = clamp(x, 60, W - 60) + "px";
+    p.style.top = clamp(y - (kind === "bank" ? 30 : 0), 40, H - 20) + "px";
     p.style.setProperty("--r", rand(-6, 6).toFixed(1) + "deg");
-    p.innerHTML = "<b></b><span></span>";
-    p.firstChild.textContent = title;
-    p.lastChild.textContent = "+" + fmt(amount);
-    el.stage.appendChild(p);
-    setTimeout(() => p.remove(), 900);
+    p.textContent = text;
+    el.game.appendChild(p);
+    setTimeout(() => p.remove(), kind === "bank" ? 1300 : 900);
   }
-
-  function tap(e) {
-    const now = performance.now();
-    combo = now < comboUntil ? combo + 1 : 0;
-    comboUntil = now + COMBO_WINDOW;
-    S.bestCombo = Math.max(S.bestCombo, combo);
-    const amount = tapBase() * comboMult();
-    gain(amount);
-    S.taps += 1;
-
-    const trick = pickTrick();
-    if (!reduceMotion()) {
-      boardAnim?.cancel(); liftAnim?.cancel();
-      const h = LIFT[trick.id];
-      liftAnim = el.lift.animate([
-        { transform: "translateY(0) scale(1)" },
-        { transform: `translateY(${-h}px) scale(1.12)`, offset: 0.45 },
-        { transform: "translateY(0) scale(1)" },
-      ], { duration: 540, easing: "cubic-bezier(.2,.7,.3,1)" });
-      boardAnim = el.board.animate(ANIMS[trick.id], { duration: 540, easing: "cubic-bezier(.25,.6,.3,1)" });
-      el.shadow.animate([{ transform: "scale(1)", opacity: 1 }, { transform: "scale(.55)", opacity: 0.4, offset: 0.45 }, { transform: "scale(1)", opacity: 1 }], { duration: 540 });
-      setTimeout(wheelSparks, 480);
-      if (combo && combo % 15 === 0) {
-        el.stage.animate([{ transform: "translate(0,0)" }, { transform: "translate(-4px,2px)" }, { transform: "translate(4px,-2px)" }, { transform: "translate(0,0)" }], { duration: 220 });
-        confettiBurst(W / 2, H * 0.75, 18, 260);
-      }
-    }
-    const rect = el.stage.getBoundingClientRect();
-    const x = Math.min(Math.max(e.clientX - rect.left, 70), rect.width - 70);
-    const y = Math.min(Math.max(e.clientY - rect.top, 70), rect.height - 40);
-    popText(x, y - 30, trick.name, amount);
-    try { navigator.vibrate?.(8); } catch { /* non supporté */ }
-    el.hint.hidden = true;
+  function updateComboHud() {
+    el.combo.hidden = !K.items.length;
+    if (!K.items.length) return;
+    el.comboNames.textContent = K.items.slice(-4).join(" + ") + (K.items.length > 4 ? " …" : "");
+    el.comboScore.innerHTML = `${fmt(K.pending)} <em>× ${K.items.length}</em>`;
   }
-  el.stage.addEventListener("pointerdown", (e) => {
-    if (e.target.closest(".golden")) return;
-    e.preventDefault();
-    tap(e);
+  function updateLetters() {
+    [...el.letters.children].forEach((s, i) => s.classList.toggle("got", i < S.letters));
+  }
+  let hintAt = 0;
+  function hintOnce(msg) { if (performance.now() - hintAt > 3000) { hintAt = performance.now(); toast(msg, 2200); } }
+
+  // ================= Panneau redimensionnable =================
+  let sheetMode = "mid";
+  try { sheetMode = localStorage.getItem("neutron-skate.sheet") || "mid"; } catch { /* ignoré */ }
+  function snaps() {
+    const appH = el.app.clientHeight, topH = el.top.offsetHeight;
+    const min = el.grab.offsetHeight + el.tabs.offsetHeight + 4;
+    const max = Math.max(min + 40, appH - topH - 150);
+    return { min, mid: clamp(Math.round(appH * 0.42), min + 40, max), max };
+  }
+  function setSheet(mode, animate = true) {
+    sheetMode = mode;
+    el.sheet.classList.toggle("dragging", !animate);
+    el.sheet.style.height = snaps()[mode] + "px";
+    el.grabLabel.textContent = mode === "min" ? "Afficher les améliorations" : mode === "max" ? "Réduire" : "Améliorations";
+    try { localStorage.setItem("neutron-skate.sheet", mode); } catch { /* ignoré */ }
+  }
+  let drag = null;
+  function dragStart(e) {
+    if (e.button > 0) return;
+    drag = { id: e.pointerId, y: e.clientY, h: el.sheet.offsetHeight, moved: false, target: e.target };
+  }
+  function dragMove(e) {
+    if (!drag || drag.id !== e.pointerId) return;
+    const dy = e.clientY - drag.y;
+    if (!drag.moved && Math.abs(dy) < 8) return;
+    if (!drag.moved) { drag.moved = true; try { e.currentTarget.setPointerCapture(e.pointerId); } catch { /* ignoré */ } }
+    const s = snaps();
+    el.sheet.classList.add("dragging");
+    el.sheet.style.height = clamp(drag.h - dy, s.min, s.max) + "px";
+  }
+  function dragEnd(e) {
+    if (!drag || drag.id !== e.pointerId) return;
+    const d = drag; drag = null;
+    if (!d.moved) return;
+    suppressClick = true; setTimeout(() => { suppressClick = false; }, 50);
+    const s = snaps(), h = el.sheet.offsetHeight;
+    const best = ["min", "mid", "max"].reduce((a, b) => (Math.abs(s[b] - h) < Math.abs(s[a] - h) ? b : a));
+    setSheet(best);
+  }
+  let suppressClick = false;
+  for (const zone of [el.grab, el.tabs]) {
+    zone.addEventListener("pointerdown", dragStart);
+    zone.addEventListener("pointermove", dragMove);
+    zone.addEventListener("pointerup", dragEnd);
+    zone.addEventListener("pointercancel", dragEnd);
+  }
+  el.grab.addEventListener("click", () => {
+    if (suppressClick) return;
+    setSheet(sheetMode === "min" ? "mid" : sheetMode === "mid" ? "max" : "min");
   });
-
-  // ================= Planche dorée =================
-  let nextGolden = Date.now() + 40000 + Math.random() * 40000;
-  function spawnGolden() {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.className = "golden";
-    b.setAttribute("aria-label", "Planche dorée : tape pour un bonus");
-    b.style.top = 15 + Math.random() * 40 + "%";
-    b.addEventListener("pointerdown", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const reward = Math.max(tapBase() * 30, perSecond() * 90, 25);
-      gain(reward);
-      S.goldens += 1;
-      const rect = el.stage.getBoundingClientRect();
-      const x = e.clientX - rect.left, y = e.clientY - rect.top;
-      popText(Math.min(Math.max(x, 80), rect.width - 80), y, "Planche dorée !", reward, true);
-      confettiBurst(x, y, 30, 300);
-      try { navigator.vibrate?.([15, 30, 15]); } catch { /* non supporté */ }
-      b.remove();
-    });
-    b.addEventListener("animationend", (e) => { if (e.animationName === "drift") b.remove(); });
-    el.stage.appendChild(b);
-  }
+  new ResizeObserver(() => resizeScene()).observe(el.game);
+  addEventListener("resize", () => setSheet(sheetMode, false));
 
   // ================= Rangs =================
   function updateRank() {
@@ -1208,28 +1460,24 @@
       S.rank = idx;
       save();
       el.rankupName.textContent = RANKS[idx].name;
-      el.rankupText.textContent = `Bonus de rang : +${Math.round(idx * RANK_BONUS * 100)} % sur tout ton style. Nouveau graphisme sous la planche et nouveau soleil sur ton spot.`;
+      el.rankupText.textContent = `Bonus de rang : +${Math.round(idx * RANK_BONUS * 100)} % sur tout ton style. Nouvelle couleur de planche et nouveau soleil sur le park.`;
       el.rankup.hidden = false;
-      confettiBurst(W / 2, H * 0.6, 60, 380);
+      confettiBurst(P.x, P.y - 80, 60, 420);
       try { navigator.vibrate?.([20, 40, 20, 40, 60]); } catch { /* non supporté */ }
     }
     const cur = RANKS[S.rank], next = RANKS[S.rank + 1];
     el.rankName.textContent = cur.name;
     if (next) {
-      const p = Math.min(1, (S.total - cur.at) / (next.at - cur.at));
+      const p = clamp((S.total - cur.at) / (next.at - cur.at), 0, 1);
       el.rankBar.style.width = (p * 100).toFixed(1) + "%";
-      el.rankNext.textContent = `Prochain rang : ${next.name} · ${Math.floor(p * 100)} %`;
-    } else {
-      el.rankBar.style.width = "100%";
-      el.rankNext.textContent = "Rang maximum atteint";
-    }
+      el.rankNext.textContent = `${next.name} · ${Math.floor(p * 100)} %`;
+    } else { el.rankBar.style.width = "100%"; el.rankNext.textContent = "Rang max"; }
   }
   $("rankupOk").addEventListener("click", () => { el.rankup.hidden = true; });
   el.rankup.addEventListener("click", (e) => { if (e.target === el.rankup) el.rankup.hidden = true; });
 
   // ================= Boutique =================
   let tab = "tricks", buyN = 1, rows = [], statsEls = null;
-
   function itemRow(badge, color, onBuy, withMeter) {
     const row = document.createElement("div");
     row.className = "item";
@@ -1238,50 +1486,71 @@
     b.textContent = badge;
     b.style.setProperty("--c", color);
     b.style.setProperty("--r", rand(-10, 8).toFixed(0) + "deg");
-    const btn = row.querySelector(".buy");
-    btn.addEventListener("click", () => { onBuy(); save(); refresh(true); });
+    row.querySelector(".buy").addEventListener("click", () => { onBuy(); save(); refresh(true); });
     el.list.appendChild(row);
-    return { row, btn, badge: b, ownedEl: row.querySelector(".owned"), descEl: row.querySelector(".desc"), nameEl: row.querySelector(".name span"), meter: row.querySelector(".meter i") };
+    return { row, btn: row.querySelector(".buy"), badge: b, ownedEl: row.querySelector(".owned"), descEl: row.querySelector(".desc"), nameEl: row.querySelector(".name span"), meter: row.querySelector(".meter i") };
   }
-  const isNextTrick = (t) => TRICKS.find((x) => !S.tricks[x.id]) === t;
+  function setBtn(btn, cost, can, label, qty = "") {
+    btn.classList.toggle("got", cost === null);
+    btn.disabled = cost === null || !can;
+    const html = cost === null ? label : `${qty ? `<small>${qty}</small>` : ""}${fmt(cost)}`;
+    if (btn._html !== html) { btn.innerHTML = html; btn._html = html; }
+  }
+  const nextOf = (list, has) => list.find((x) => !has(x));
 
   function buildList() {
     el.list.innerHTML = "";
     el.list.scrollTop = 0;
     el.buyMode.hidden = tab !== "crew";
-    rows = [];
-    statsEls = null;
+    rows = []; statsEls = null;
     if (tab === "tricks") {
       TRICKS.forEach((t, i) => {
-        const r = itemRow(t.tag, [C.yellow, C.pink, C.blue][i % 3], () => {
+        const r = itemRow(ARROWS[t.dir], [C.yellow, C.pink, C.blue][i % 3], () => {
           if (S.tricks[t.id] || S.style < t.cost) return;
-          S.style -= t.cost;
-          S.tricks[t.id] = true;
-          toast(`Nouvelle figure : <b>${t.name}</b>. Tes tapes valent ×${t.mult}.`);
-          confettiBurst(W / 2, H * 0.75, 24, 280);
+          S.style -= t.cost; S.tricks[t.id] = true;
+          toast(`Nouvelle figure : <b>${t.name}</b>. En l'air, glisse ${ARROWS[t.dir]}`);
         });
+        r.badge.classList.add("arrow");
         r.update = () => {
           const got = !!S.tricks[t.id];
-          const visible = got || S.total >= t.cost * 0.3 || isNextTrick(t);
+          const visible = got || S.total >= t.cost * 0.3 || nextOf(TRICKS, (x) => S.tricks[x.id]) === t;
           r.nameEl.textContent = visible ? t.name : "Figure secrète";
-          r.badge.textContent = visible ? t.tag : "?";
-          r.ownedEl.textContent = t.mult > 1 ? `×${t.mult}` : "";
-          r.descEl.textContent = visible ? t.desc : "Gagne plus de style pour la découvrir.";
+          r.badge.textContent = visible ? ARROWS[t.dir] : "?";
+          r.ownedEl.textContent = visible ? `${fmt(t.pts)} pts` : "";
+          r.descEl.textContent = visible ? `${t.desc} Glisse ${ARROWS[t.dir]} en l'air.` : "Gagne plus de style pour la découvrir.";
           r.row.classList.toggle("locked", !visible);
           r.row.classList.toggle("done", got);
-          setBtn(r.btn, got ? null : t.cost, !got && S.style >= t.cost, got ? "Acquis" : "");
+          setBtn(r.btn, got ? null : t.cost, S.style >= t.cost, "Apprise");
+        };
+        rows.push(r);
+      });
+    } else if (tab === "park") {
+      PARK.forEach((m, i) => {
+        const r = itemRow(m.tag, [C.blue, C.yellow, C.pink][i % 3], () => {
+          if (S.park[m.id] || S.style < m.cost) return;
+          S.style -= m.cost; S.park[m.id] = true;
+          toast(`<b>${m.name}</b> construit ! Il arrive sur ton parcours.`);
+          tileKey = "";
+        });
+        r.update = () => {
+          const got = !!S.park[m.id];
+          const visible = got || S.total >= m.cost * 0.3 || nextOf(PARK, (x) => S.park[x.id]) === m;
+          r.nameEl.textContent = visible ? m.name : "Module secret";
+          r.badge.textContent = visible ? m.tag : "?";
+          r.ownedEl.textContent = visible ? `+${PARK_BONUS * 100} %` : "";
+          r.descEl.textContent = visible ? `${m.desc} +10 % de points en ride.` : "Gagne plus de style pour le découvrir.";
+          r.row.classList.toggle("locked", !visible);
+          r.row.classList.toggle("done", got);
+          setBtn(r.btn, got ? null : m.cost, S.style >= m.cost, "Construit");
         };
         rows.push(r);
       });
     } else if (tab === "gear") {
       GEAR.forEach((g, i) => {
-        const r = itemRow(g.tag, [C.pink, C.yellow, C.blue, C.pink][i], () => {
+        const r = itemRow(g.tag, [C.pink, C.yellow, C.blue, C.pink, C.yellow][i], () => {
           const c = gearCost(g);
           if (lvl(g.id) >= g.max || S.style < c) return;
-          const before = tierOf(lvl(g.id), g.tiers);
-          S.style -= c;
-          S.gear[g.id] = lvl(g.id) + 1;
-          if (tierOf(lvl(g.id), g.tiers) > before) toast(`<b>${g.name}</b> : regarde ta planche !`);
+          S.style -= c; S.gear[g.id] = lvl(g.id) + 1;
         }, true);
         r.update = () => {
           const l = lvl(g.id), maxed = l >= g.max, c = gearCost(g);
@@ -1305,31 +1574,21 @@
           const cost = crewCost(c, n);
           if (n < 1 || S.style < cost) return;
           const before = owned(c.id);
-          S.style -= cost;
-          S.crew[c.id] = before + n;
-          if (before === 0) {
-            fx.flashes.push({ id: c.id, life: 1 });
-            toast(`Nouveau dans ton spot : <b>${c.name}</b>`);
-          } else if (milestoneMult(before + n) > milestoneMult(before)) {
-            fx.flashes.push({ id: c.id, life: 1 });
-            toast(`<b>${c.name}</b> : production doublée !`);
-          } else if (crewTier(before + n) > crewTier(before)) {
-            fx.flashes.push({ id: c.id, life: 1 });
-          }
+          S.style -= cost; S.crew[c.id] = before + n;
+          if (before === 0) toast(`Nouveau dans ton park : <b>${c.name}</b>`);
+          else if (milestoneMult(before + n) > milestoneMult(before)) toast(`<b>${c.name}</b> : production doublée !`);
+          tileKey = "";
         }, true);
         r.update = () => {
           const n = owned(c.id);
           const visible = n > 0 || i === 0 || S.total >= c.base * 0.4 || owned(CREW[i - 1].id) > 0;
           const qty = buyN === "max" ? Math.max(1, crewMaxAffordable(c)) : buyN;
-          const cost = crewCost(c, qty);
-          const next = nextMilestone(n);
+          const cost = crewCost(c, qty), next = nextMilestone(n);
           const prev = [...MILESTONES].reverse().find((m) => n >= m) || 0;
           r.nameEl.textContent = visible ? c.name : "???";
           r.badge.textContent = visible ? c.tag : "?";
           r.ownedEl.textContent = n ? `×${n}` : "";
-          r.descEl.textContent = visible
-            ? `${c.desc} ${fmt(crewUnitRate(c))}/s chacun${n ? ` · total ${fmt(crewRate(c))}/s` : ""}${next ? ` · ×2 à ${next}` : ""}`
-            : "Continue de rider pour débloquer.";
+          r.descEl.textContent = visible ? `${c.desc} ${fmt(crewUnitRate(c))}/s chacun${n ? ` · total ${fmt(crewRate(c))}/s` : ""}${next ? ` · ×2 à ${next}` : ""}` : "Continue de rider pour débloquer.";
           r.meter.style.width = next ? ((n - prev) / (next - prev)) * 100 + "%" : "100%";
           r.meter.parentElement.hidden = !visible;
           r.row.classList.toggle("locked", !visible);
@@ -1337,67 +1596,67 @@
         };
         rows.push(r);
       });
-    } else {
-      buildStats();
-    }
-  }
-
-  function setBtn(btn, cost, can, label, qtyLabel = "") {
-    btn.classList.toggle("got", cost === null);
-    btn.disabled = cost === null || !can;
-    const html = cost === null ? label : `${qtyLabel ? `<small>${qtyLabel}</small>` : ""}${fmt(cost)}`;
-    if (btn._html !== html) { btn.innerHTML = html; btn._html = html; }
+    } else buildStats();
   }
 
   function buildStats() {
     el.list.innerHTML = `
+      <ul class="controls">
+        <li><b>Tape</b> ollie (aussi depuis une barre)</li>
+        <li><b>Glisse</b> en l'air : la figure de cette direction</li>
+        <li><b>Barres et ledges</b> : retombe dessus pour grinder</li>
+        <li><b>Combo</b> : points × nombre d'éléments, encaissés quand tu roules au sol</li>
+        <li><b>Clavier</b> : espace, flèches, Q/E/A/D pour les diagonales</li>
+      </ul>
       <dl class="stats">
         <div><dt>Style gagné au total</dt><dd data-s="total"></dd></div>
-        <div><dt>Points par tape</dt><dd data-s="tap"></dd></div>
-        <div><dt>Production par seconde</dt><dd data-s="rate"></dd></div>
-        <div><dt>Bonus de rang</dt><dd data-s="bonus"></dd></div>
-        <div><dt>Tapes sur la planche</dt><dd data-s="taps"></dd></div>
-        <div><dt>Meilleur combo</dt><dd data-s="combo"></dd></div>
-        <div><dt>Figures apprises</dt><dd data-s="tricks"></dd></div>
-        <div><dt>Planches dorées attrapées</dt><dd data-s="goldens"></dd></div>
-        <div><dt>Temps depuis le début</dt><dd data-s="time"></dd></div>
+        <div><dt>Multiplicateur de ride</dt><dd data-s="ride"></dd></div>
+        <div><dt>Production du crew</dt><dd data-s="rate"></dd></div>
+        <div><dt>Meilleur combo</dt><dd data-s="best"></dd></div>
+        <div><dt>Plus long combo</dt><dd data-s="mult"></dd></div>
+        <div><dt>Figures posées</dt><dd data-s="tricks"></dd></div>
+        <div><dt>Gaps franchis</dt><dd data-s="gaps"></dd></div>
+        <div><dt>Chutes</dt><dd data-s="bails"></dd></div>
+        <div><dt>S-K-A-T-E complétés</dt><dd data-s="skate"></dd></div>
+        <div><dt>Temps de jeu</dt><dd data-s="time"></dd></div>
       </dl>
       <p class="section-title">Les rangs</p>
       <ul class="ranks" id="ranksList"></ul>
       <button type="button" class="danger" id="resetBtn">Recommencer de zéro</button>
       <div class="confirm" id="confirmBox" hidden>
-        <span>Tout ton style, tes figures, ton matos et ton crew seront effacés. Recommencer ?</span>
+        <span>Tout ton style, tes figures, ton park, ton matos et ton crew seront effacés. Recommencer ?</span>
         <div class="row"><button type="button" class="no" id="noBtn">Annuler</button><button type="button" class="yes" id="yesBtn">Tout effacer</button></div>
       </div>`;
     statsEls = Object.fromEntries([...el.list.querySelectorAll("[data-s]")].map((d) => [d.dataset.s, d]));
     statsEls.ranks = $("ranksList");
+    ranksKey = "";
     const box = $("confirmBox"), reset = $("resetBtn");
     reset.addEventListener("click", () => { box.hidden = false; reset.hidden = true; });
     $("noBtn").addEventListener("click", () => { box.hidden = true; reset.hidden = false; });
     $("yesBtn").addEventListener("click", () => {
-      S = fresh();
-      save();
-      combo = 0;
-      el.hint.hidden = false;
-      lookKey = ""; sceneKey = "";
-      buildList();
-      refresh(true);
+      S = fresh(); S.tutorial = true; save();
+      K.items = []; K.pending = 0; updateComboHud(); updateLetters();
+      resetWorld(); Object.assign(P, { x: 120, y: 0, vy: 0, mode: "ground", trick: null, rail: null });
+      tileKey = "";
+      buildList(); refresh(true);
       toast("Nouvelle partie. Un ollie pour commencer !");
     });
   }
   let ranksKey = "";
   function updateStats() {
     if (!statsEls) return;
+    const st = S.stats;
     statsEls.total.textContent = fmt(S.total);
-    statsEls.tap.textContent = fmt(tapBase());
+    statsEls.ride.textContent = "×" + rideMult().toFixed(2).replace(".", ",");
     statsEls.rate.textContent = fmt(perSecond()) + "/s";
-    statsEls.bonus.textContent = `+${Math.round(S.rank * RANK_BONUS * 100)} %`;
-    statsEls.taps.textContent = S.taps.toLocaleString("fr-FR");
-    statsEls.combo.textContent = S.bestCombo;
-    statsEls.tricks.textContent = `${TRICKS.filter((t) => S.tricks[t.id]).length} / ${TRICKS.length}`;
-    statsEls.goldens.textContent = S.goldens;
+    statsEls.best.textContent = fmt(st.bestCombo);
+    statsEls.mult.textContent = st.bestMult + " éléments";
+    statsEls.tricks.textContent = st.tricks.toLocaleString("fr-FR");
+    statsEls.gaps.textContent = st.gaps;
+    statsEls.bails.textContent = st.bails;
+    statsEls.skate.textContent = st.skate;
     statsEls.time.textContent = fmtDuration(Date.now() - S.started);
-    if (ranksKey !== String(S.rank) || !statsEls.ranks.children.length) {
+    if (ranksKey !== String(S.rank)) {
       ranksKey = String(S.rank);
       statsEls.ranks.innerHTML = "";
       RANKS.forEach((r, i) => {
@@ -1410,10 +1669,10 @@
       });
     }
   }
-
   function updateTabDots() {
     const counts = {
       tricks: TRICKS.filter((t) => !S.tricks[t.id] && S.style >= t.cost).length,
+      park: PARK.filter((m) => !S.park[m.id] && S.style >= m.cost).length,
       gear: GEAR.filter((g) => lvl(g.id) < g.max && S.style >= gearCost(g) && S.total >= g.base * 0.3).length,
       crew: CREW.filter((c) => S.style >= crewCost(c, 1)).length,
     };
@@ -1421,11 +1680,10 @@
       const dot = t.querySelector(".dot");
       if (!dot) return;
       const n = counts[t.dataset.tab];
-      dot.hidden = !n || t.dataset.tab === tab;
+      dot.hidden = !n || (t.dataset.tab === tab && sheetMode !== "min");
       dot.textContent = n;
     });
   }
-
   let lastRefresh = 0;
   function refresh(force) {
     el.style.textContent = fmt(S.style);
@@ -1434,55 +1692,51 @@
     if (!force && now - lastRefresh < 200) return;
     lastRefresh = now;
     rows.forEach((r) => r.update());
-    updateStats();
-    updateTabDots();
-    updateRank();
-    applyBoardLook();
+    updateStats(); updateTabDots(); updateRank();
   }
-
   document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () => {
+    if (suppressClick) return;
     tab = t.dataset.tab;
     document.querySelectorAll(".tab").forEach((x) => x.setAttribute("aria-selected", String(x === t)));
-    buildList();
-    refresh(true);
+    if (sheetMode === "min") setSheet("mid");
+    buildList(); refresh(true);
   }));
   el.buyMode.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => {
     buyN = b.dataset.n === "max" ? "max" : Number(b.dataset.n);
     el.buyMode.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
     refresh(true);
   }));
-
   let toastTimer = 0;
   function toast(html, ms = 2600) {
-    el.toast.innerHTML = html;
-    el.toast.hidden = false;
+    el.toast.innerHTML = html; el.toast.hidden = false;
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => { el.toast.hidden = true; }, ms);
   }
-  el.toast.addEventListener("click", () => { el.toast.hidden = true; });
 
   // ================= Boucle =================
-  let last = performance.now(), lastSaveAt = Date.now();
+  let last = performance.now(), lastSaveAt = Date.now(), crewTick = 0;
   function frame(now) {
-    const dt = Math.min(Math.max((now - last) / 1000, 0), 1);
+    const dt = Math.min(Math.max((now - last) / 1000, 0), 0.05);
     last = now;
-    gain(perSecond() * dt);
-
-    if (now > comboUntil) combo = 0;
-    const showCombo = combo >= 3;
-    el.comboBox.hidden = !showCombo;
-    if (showCombo) {
-      const cap = comboCap(lvl("bearings"));
-      el.comboText.textContent = `Combo ×${fmtMult(comboMult())}`;
-      el.comboFill.style.width = ((comboMult() - 1) / (cap - 1)) * 100 + "%";
-    }
-    if (Date.now() > nextGolden) {
-      nextGolden = Date.now() + 45000 + Math.random() * 75000;
-      if (!document.hidden) spawnGolden();
-    }
+    const ps = perSecond();
+    gain(ps * dt);
+    crewTick += dt;
+    if (crewTick > 1 && ps > 0) { crewTick = 0; el.ratePill.classList.remove("pulse"); void el.ratePill.offsetWidth; el.ratePill.classList.add("pulse"); }
+    // Deux sous-pas pour que les barres ne soient jamais traversées
+    step(dt / 2); step(dt / 2);
+    updateFx(dt);
+    const vw = W / SC, vh = H / SC;
+    ensureWorld(P.x + vw * 2);
+    camX = P.x - vw * 0.3;
+    const ground = groundAt(P.x);
+    const focusY = P.mode === "air" ? Math.min(ground, P.y * 0.55 + ground * 0.45) : P.y;
+    const targetY = focusY - vh * 0.74;
+    camY += (targetY - camY) * Math.min(1, dt * 4);
+    drawBackground(now / 1000);
+    drawWorld(now / 1000);
+    drawScreenFx(dt);
     if (Date.now() - lastSaveAt > 5000) { save(); lastSaveAt = Date.now(); }
     refresh(false);
-    drawScene(now / 1000, dt);
     requestAnimationFrame(frame);
   }
 
@@ -1499,17 +1753,18 @@
     else { offlineGains(); last = performance.now(); save(); }
   });
   addEventListener("pagehide", save);
-  addEventListener("resize", resizeScene);
   document.addEventListener("gesturestart", (e) => e.preventDefault());
-  document.fonts?.ready.then(() => { sceneKey = ""; });
+  document.fonts?.ready.then(() => { tileKey = ""; });
 
-  // Un ancien joueur garde son rang sans revoir toutes les célébrations
   S.rank = Math.max(S.rank, rankIndex(S.total));
+  resetWorld();
   resizeScene();
+  setSheet(sheetMode, false);
+  el.tuto.hidden = S.tutorial;
+  updateLetters();
   offlineGains();
   buildList();
   refresh(true);
-  if (S.taps > 0) el.hint.hidden = true;
   requestAnimationFrame(frame);
 })();
 </script>

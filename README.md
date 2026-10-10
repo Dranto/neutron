@@ -1,23 +1,32 @@
 # Neutron Skate
 
-Un jeu incrémental (clicker) de skate pour mobile, en version web. Il se joue dans Safari ou Chrome, sans rien installer.
+Un jeu de skate pour mobile, en version web : tu rides un skatepark qui se construit au fil de tes améliorations. Il se joue dans Safari ou Chrome, sans rien installer.
 
-## Le principe
+## Le ride
 
-- **Tape sur la planche** pour faire une figure et gagner des **points de style**.
-- **Enchaîne les tapes** pour faire monter le combo (jusqu'à ×1,5 au départ).
-- Dépense ton style dans la boutique :
-  - **Figures** : Kickflip, Heelflip, 360 Flip, Impossible, 900… Chaque figure apprise multiplie les points de chaque tape.
-  - **Matos** : grip (points par tape), roulements (combo max), wax (une partie de la production ajoutée à chaque tape), chaussures (production des automatisations).
-  - **Crew** : les automatisations, qui gagnent du style chaque seconde (pote qui filme, skatepark, Insta, sponsor, part vidéo, team pro, marque, contest). Leur production double à 10, 25, 50, 100 et 200 exemplaires. Achat ×1, ×10 ou Max.
-- Une **planche dorée** traverse parfois l'écran : attrape-la pour un gros bonus.
-- **Rangs** (Débutant → Icône) : chaque rang donne +15 % de style sur tout, change le soleil du spot et le graphisme sous la planche.
+Le rider avance tout seul, en vue de côté.
 
-## Les améliorations se voient dans le jeu
+- **Tape** : ollie (aussi pour sortir d'un grind).
+- **Glisse en l'air** dans une direction : la figure apprise pour cette direction (← Kickflip, → Heelflip, ↓ Pop Shove-it, ↑ Indy Grab, ↙ 360 Flip, ↘ Hardflip, ↖ Impossible, ↗ 900). Glisser depuis le sol fait l'ollie et la figure d'un seul geste.
+- **Barres et ledges** : retombe dessus pour grinder.
+- **Kickers et rampes** : ils t'envoient en l'air pour enchaîner plusieurs figures.
+- **Gaps** : franchis le trou en l'air pour un bonus.
+- **Réception** : si la figure n'est pas terminée quand tu touches le sol ou la barre, tu tombes et tu perds le combo.
+- **Combo** : points × nombre d'éléments enchaînés, encaissés après un court moment de roule au sol. Un saut sans figure rapporte ses points directement.
+- **Lettres S-K-A-T-E** et **planches dorées** à attraper en l'air pour des bonus.
+- Clavier sur ordinateur : espace, flèches, Q/E/A/D pour les diagonales.
 
-- **Le spot évolue avec ton crew** : potes caméra au bord, modules de skatepark, téléphone Insta et pluie de likes, skateshop, caméra et projecteur de la part vidéo, pros qui roulent au fond, panneau géant de ta marque, gradins, foule et confettis du contest. Les gains de chaque membre s'envolent au-dessus de lui chaque seconde.
-- **La planche évolue avec ton matos** : nouveaux grips (niveaux 5, 15, 40, 100), couleur des roues et étincelles à la réception (roulements), curb qui brille (wax), pieds du rider sur la planche (chaussures).
-- La partie est **sauvegardée automatiquement** dans le navigateur. Pendant ton absence, ton crew continue de gagner 50 % de sa production (8 h maximum).
+## Les améliorations
+
+Le panneau du bas se **glisse** (ou se touche) pour l'agrandir, le réduire ou le masquer presque entièrement.
+
+- **Figures** : nouvelles figures et nouvelles directions.
+- **Park** : chaque module construit apparaît sur le parcours (kicker, ledge, funbox avec rail, escalier et rampe, gap, grosse rampe, méga rampe) et donne +10 % de points en ride.
+- **Matos** : grip (points des figures), planche pro (hauteur d'ollie), roulements (vitesse, couleur des roues), wax (grinds), chaussures (réceptions plus tolérantes).
+- **Crew** : production passive de style ; chaque membre apparaît dans le décor (potes qui filment au bord des modules, likes Insta, skateshop, filmeur qui te suit, pros au fond, panneau de ta marque, gradins et confettis du contest).
+- **Rangs** : de Débutant à Icône, chacun donne +15 % de style, change le soleil et la couleur du dessous de la planche.
+
+La partie est sauvegardée dans le navigateur. Pendant ton absence, le crew gagne 50 % de sa production (8 h maximum).
 
 ## Fichiers
 
@@ -27,7 +36,7 @@ Un jeu incrémental (clicker) de skate pour mobile, en version web. Il se joue d
 | `manifest.webmanifest` | Permet d'ajouter le jeu à l'écran d'accueil, où il s'ouvre comme une app |
 | `icons/` | Icônes de l'app |
 
-Les valeurs d'équilibrage (prix, gains, multiplicateurs) sont regroupées en haut du script dans `TRICKS`, `GEAR` et `CREW`.
+Les valeurs d'équilibrage sont regroupées en haut du script : `TRICKS`, `PARK`, `GEAR`, `CREW`, `RANKS`.
 
 ## Tester en local
 
